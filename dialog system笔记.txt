@@ -1,0 +1,79 @@
+DST: 用slot的键值对表示对话状态。
+
+
+2020
+    ACL
+        Designing Precise and Robust Dialogue Response Evaluators
+            目的：对话质量的自动评估。因为人力太耗时
+        Dialogue State Tracking with Explicit Slot Connection Modeling
+            目的：寻找对话中上下文相关联的槽。因为有些槽会被共指或省略
+            数据集：公开。MultiWOZ 2.0，MultiWOZ 2.1，都是特定任务型，预定医院、餐厅、出租车等
+        Large Scale Multi-Actor Generative Dialog Modeling
+            目的：解决闲聊机器人人格不连贯的问题。
+            数据集：未公开。从Reddit上爬取的亿级评论数据。
+        PLATO: Pre-trained Dialogue Generation Model with Discrete Latent Variable
+            目的：类似于BERT，做一个无监督的预训练模型。用于下游任务。先在通用文本上预训练，然后在Reddit和Twitter上预训练。
+                在闲聊机器人、特定任务机器人、单轮问答任务上进行了实验。
+            数据集：部分公开。Twitter 与 Reddit 的数据对应的论文在文中指出了。
+            代码：公开
+        Slot-consistent NLG for Task-oriented Dialogue Systems with Iterative Rectification Network
+            目的：做NLG部分。因为NLG部分生成对话时有时会忽略某些slot或产生一个重复的slot值。
+            数据集：四个其他论文提出的任务。应该是公开数据集。
+        Span-ConveRT: Few-shot Span Extraction for Dialog with Pretrained Conversational Representations
+            目的：做特定任务的小样本领域的slot-filling
+            数据集：公开。不是完整对话，只是用于slot-filling的单句对话。
+        Zero-Shot Transfer Learning with Synthesized Data for Multi-Domain Dialogue State Tracking
+            目的：做零样本迁移学习的DST
+            数据集：公开。MultiWOZ 2.1。
+        Efficient Dialogue State Tracking by Selectively Overwriting Memory
+            目的：做非预先固定slot的DST。
+            数据集：公开。MultiWOZ 2.1。
+        End-to-End Neural Pipeline for Goal-Oriented Dialogue Systems using GPT-2
+            目的：端到端地训练任务型对话系统，并可输出中间结果（DST）从而增加可解释性。利用了预训练模型GPT-2
+            数据集：公开。MultiWOZ 2。
+            代码：公开
+
+
+技能商店：
+    百度 https://ai.baidu.com/unit/v2/#/sceneliblist
+    微信 https://openai.weixin.qq.com/
+    讯飞 https://aiui.xfyun.cn/store/all
+    阿里 https://iap.aligenie.com/console/market/list
+
+对话构建工具：
+    谷歌 https://cloud.google.com/dialogflow/es/docs/basics
+    ChatFuel https://dashboard.chatfuel.com/bot/5ff312c4fd8cb9542d648384/flows/5ff3130e3d80cc436aba73c7?
+
+
+数据集：
+    SQuAD(Stanford Question Answering Dataset): 给一段文本，给定一个问题，在文本中寻找答案。
+        例如：
+        Article: Endangered Species Act
+        Paragraph: “ . . . Other legislation followed, including
+        the Migratory Bird Conservation Act of 1929, a 1937
+        treaty prohibiting the hunting of right and gray whales,
+        and the Bald Eagle Protection Act of 1940. These later
+        laws had a low cost to society—the species were relatively rare—and little opposition was raised.”
+
+        Question 1: “Which laws faced significant opposition?”
+        Plausible Answer: later laws
+
+        Question 2: “What was the name of the 1937 treaty?”
+        Plausible Answer: Bald Eagle Protection Act
+
+比赛：
+    2020.4 The Ninth Dialog System Technology Challenge (DSTC9)
+        https://www.aclweb.org/portal/content/ninth-dialog-system-technology-challenge-dstc9
+        任务1： Beyond Domain APIs
+            参赛者被要求做一个特定任务的对话系统，它能够理解相关的领域知识，然后利用相关的领域知识，回应对话。
+        任务2： Multi-domain Task-oriented Dialog Challenge II (Microsoft Research AI & Tsinghua University)
+            做能用于multi-domain环境下的对话系统。
+        任务3： Interactive Evaluation of Dialog (CMU & USC)
+            做能用于真实与用户交换的对话系统
+            数据集：Amazon Topical-Chat Corpus。是开放域的数据集。
+            评估指标：
+                2005 METEOR： An Automatic Metric for MT Evaluation with Improved Correlation with Human Judgments
+                2019 BERTScore： EVALUATING TEXT GENERATION WITH BERT
+                2020 USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation
+        任务4： SIMMC: Situated Interactive Multi-Modal Conversational AI (Facebook Assistant & Facebook AI)
+            做基于multi-modal输入的对话系统

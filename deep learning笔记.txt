@@ -1,0 +1,29 @@
+二维卷积层的输入和输出都是4维
+attention层有两种形式：
+    Luong attention: dot attention，也是transformer中使用的形式
+    Bahdanau attention： additive attention
+    两种形式的输入都是query, key, value三个张量。一般而言，value与key是同一个的张量
+        1.query、key进行dot或sum运算得到score
+        2.score进行softmax（可能有scale、mask）distribution
+        3.dot(distribution, value)得到attention
+    当Q K V 来源相同时，这种attention 称为self-attention，如果GPT和transformer中使用的attention.
+    Q K V的概念来自信息检索理论。
+        The key/value/query concepts come from retrieval systems. For example, when you type a query to search for some video on Youtube, the search engine will map your query against a set of keys (video title, description etc.) associated with candidate videos in the database, then present you the best matched videos (values).
+    attention 的输入来自两个层，可以用来对正层之间的位置，如英语-德语、图片、描述
+    self-attention 的输入来自同一个层，可以用于提取输入序列的各部分间的关系
+    参考解释：https://stats.stackexchange.com/questions/421935/ 中 dontloo 的回答
+dnn、cnn、rnn层都可以带激活函数
+
+keras 中 BinaryCrossentropy 与 CategoricalCrossentropy 的区别
+    BinaryCrossentropy 把每个数当作一个真标签的概率
+    CategoricalCrossentropy 把一个向量当作one-hot编码对应的各标签概率
+
+    若对一个向量分别使用 BinaryCrossentropy 与 CategoricalCrossentropy ,则其大小关系为
+        f(CategoricalCrossentropy) = f(BinaryCrossentropy) / vector_size
+
+    keras 的损失函数包装器是对最后一维求损失，然后 CategoricalCrossentropy/BinaryCrossentropy 的 reduction 参数可以设置如何综合这些所有的损失
+
+    所以，二分类任务和多分类多标签的任务使用 BinaryCrossentropy ，而多分类单标签的任务使用 CategoricalCrossentropy。可以对于任意维度的张量使用这两个损失包装器。
+
+调节机器学习模型时，使用正交化调节技巧：即一次调节一个东西。
+    比如，先调train时的性能，再调val的性能，最后调test的性能

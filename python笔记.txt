@@ -1,0 +1,96 @@
+python 2 运行出现SyntaxError: Non-ASCII character '\xe8' in file 是因为源文件中有中文出现： 在第一行加上 
+#encoding:utf-8 即可
+
+解析命令行传递的参数
+	parser = argparse.ArgumentParser(description='Process some integers.')
+	parser.add_argument('integers', type=int, nargs='+', help='xxx')
+	parser.add_argument('--test_case', type=int, default=1000, help='xxx')
+
+	args = parser.parse_args()
+	# args, _ = parser.parse_known_args() 将不能解析的参数放入 _ 中，不报错
+	intergets = args.intergets
+	test_case = args.test_case
+	
+	
+配置日志的方法：
+	import logging
+	import time
+	import os
+
+
+	def init_logging(log_dir='log_', extra=''):
+		if not os.path.exists(log_dir):
+			os.makedirs(log_dir)
+
+		# std handler
+		stderr_handler = logging.StreamHandler()  # 默认是 stderr
+		stderr_handler.setLevel(logging.DEBUG)
+		# file handler
+		current_filename = __file__.split('/')[-1].replace('.', '_')
+		current_time = time.strftime("%Y-%m-%d %H-%M-%S", time.localtime())
+		file_handler = logging.FileHandler('{}/{}_{}_{}.log'.format(log_dir, extra, current_filename, current_time))
+		file_handler.setLevel(logging.DEBUG)
+
+		format_str = '%(levelname)s: %(filename)s: %(funcName)s: %(asctime)s:\n    %(message)s'
+		# basicConfig() 必须出现在任何 debug(), info() 等之前，且只有第一次调用有效
+		# logger = logging.getLogger('name')
+		logging.basicConfig(format=format_str, level=logging.DEBUG, handlers=[file_handler, stderr_handler])
+
+
+	init_logging()
+	logging.debug('debug messages')
+	logging.warning('warning messages')
+	logging.error('error messages')
+		
+多进程编程：
+	import multiprocessing as mp
+
+	def fun(queue, kw='kwargs'):
+		queue.put('hello')
+		queue.put(kw)
+
+	if __name__ == '__main__':
+		# 得到 context, context 拥有与 mp 相同的 API
+		# 并设置之后子进程被创建的方式。 spwan 方式创建的子进程只保留运行 run 方法必要的数据，不复制无用的文件句柄等
+		ctx = mp.get_context('spawn')
+
+		q = ctx.Queue()  # 创建多进程安全的队列
+		processes = []
+		for i in range(3):
+			# 创建 Process，指定子进程要运行的函数及其参数
+			processes.append(ctx.Process(target=fun, args=(q,), kwargs={'kw': 'world'}))
+		for p in processes:
+			# p.daemon = True
+			p.start()  # 开始运行子进程
+		for p in processes:
+			p.join()  # 等待子进程结束
+		while not q.empty():
+			print(q.get())
+		print('end ...')
+		
+pickle保存数据：
+	（1）
+	import pickle
+	data = {'a': [1, 2, 3], 'b': 'string'}
+	with open(PATH, 'wb') as f:
+		pickle.dump(data, f) # 保存的是什么类型，加载的就是什么类型
+	# ---    
+	with open(PATH, 'rb') as f:
+		data = pickle.load(f)    	
+	（2）
+	data_bytes = pickle.dumps(data) # 返回对象的 bytes
+	# ---
+	data = pickle.loads(data_bytes)
+	
+保存为json文件：
+	（1）
+	import json
+	PATH = './data.json'
+	data = {'a':[1,2,3], 'b':'string'}
+
+	with open(PATH, 'w') as f:
+		json.dump(data, f, indent=4)
+		
+	with open(PATH, 'r') as f:
+		data = json.load(f)    
+	（2） dumps、loads 作用于 str 类型

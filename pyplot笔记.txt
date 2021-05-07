@@ -1,0 +1,7 @@
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(40,40)) # 指定总体大小
+for i in range(16):
+    channel_data = list(df.iloc[:,i])
+    plt.subplot(4,4,i+1) # 设置当前子图
+    plt.plot(channel_data) # 画图

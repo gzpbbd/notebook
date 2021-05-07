@@ -1,0 +1,83 @@
+python连接MySql:
+    连接： conn = pymysql.connect(host='localhost', user='root', password='xccbbd', db='spider', charset='utf8')
+    创建游标： cursor = conn.cursor()
+    提交改动：conn.commit()
+    关闭游标：cursor.close()
+    关闭连接：conn.close()
+
+python执行MySql命令：
+    cursor.execute('mysql_command')
+python获取Mysql查询命令的结果：
+    cursor.fetchall()
+
+MySQL对表内部数据的操作命令：
+    增：
+        插入单行：insert into table_name(column_1, column_2) values(value_1, value_2)
+        插入多行 insert into table_name(column_1, column_2) values(value_1_1, value_1_2), (value_2_1, value_2_2)
+
+    删:
+       如果没有where子句，则改动访问为所有行：delete from table_name where condition_expression
+
+
+    改:
+        update table_name set column_name = other_value where condition_expression
+
+    查：
+        显示指定表的列信息 show columns from table_name
+        查找指定表中的列
+            select * from table_name
+            select column_name_1, column_name_2 from table_name
+        按条件筛选
+            普通条件筛选： select * from table_name where column_name = value
+                        select * from table_name where column_name between value_1 and value_2
+            LIKE筛选(%运算符匹配任意字符任意次数，_运算符匹配任意字符一次)： select * from table_name where column_name like 'like_expression'
+            正则表达式：select * from table_name where column_name regexp 're_expression'
+
+mysql库层次操作：
+    使用指定数据库 use database_name
+    显示所有数据库 show database
+    显示当前库中的所有表 show tables
+mysql修改数据表结构：
+    增加列: alter table table_name add new_column_name
+           alter table table_name add new_column_name_1, add new_column_name_2
+    删除列: alter table table_name drop old_column_name
+
+mysql数据类型：
+    串类型：
+        定长串：char(char_len)，其中char_len <= 255字符
+        变长串：
+            varchar(varchar_len) 其中varchar_len <= 255 B
+            tinytext 最大长度 255 B
+            text 最大长度 64 KB
+            mediumtext 最大长度 16 MB
+            longtext 最大长度 4 GB
+        变长串集合:
+            set 最多64个变长串
+            enum 最多64K个变长串
+    数值类型：
+        boolean
+        int 4 bytes
+        float 4 bytes
+        double 8 bytes
+        decimal 精度可变的浮点数
+    日期类型：
+        date
+        time
+        datetime
+    二进制数据类型，可用于保存图像、视频等：
+        tinyblob 最大长度 255 B
+        blob 最大长度 64 KB
+        mediumblob 最大长度 16 MB
+        longblob 最大长度 4 GB
+
+python字符串编码：
+    encode: str -> bytes(二进制类型)
+    decode: bytes(二进制类型) -> str
+    utf-8 和 gbk 都可表示中文
+
+
+SELECT * FROM spider.images;
+delete from images;
+show columns from images;
+insert into images(name, type, keyword, from, datetime, url, image) value('白裙美女', 'jpg', '美女', 'bing', 2020-9-6 2:38:00, 'http://www.bing.com', 0x12);
+insert into images(name, type, keyword, datetime, url, image) value('白裙美女', 'jpg', '美女', '2020-9-6 13:38:00', 'http://www.bing.com', 0x12);

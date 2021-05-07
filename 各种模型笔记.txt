@@ -1,0 +1,28 @@
+dot self-attention 时空复杂度都是n^2*d，n是序列长度，d是向量维数
+    当n与d相差不大时。时间复杂度比卷积层、循环层小
+
+BERT：
+    BERT-base (L=12, H=768, A=12, Total Parameters=110M)
+    BERT-large (L=24, H=1024, A=16, Total Parameters=340M)
+       L: the number of layers
+       H: the hidden size
+       A: the number of self-attention heads
+
+    原论文中讨论了各种 feature-based approach 的性能
+
+
+
+
+
+查询 github 项目的创建时间：
+    Use the Repos GitHub API to retrieve this information
+
+    Syntax: https://api.github.com/repos/{:owner}/{:repository}
+    Example: https://api.github.com/repos/libgit2/libgit2sharp
+
+可使用 github 的 api 查询项目创建时间：
+    格式: https://api.github.com/repos/{:owner}/{:repository}
+    例子: https://api.github.com/repos/tensorflow/hub
+
+请求api可以得到一个 JSON 格式的信息。其中有个字段为 created_at。
+例如在浏览器地址栏输入 https://api.github.com/repos/，搜索 created_at，可以看到对应的创建时间为 2018-03-12。

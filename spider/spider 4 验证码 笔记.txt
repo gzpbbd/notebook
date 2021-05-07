@@ -1,0 +1,18 @@
+http/https 协议是无状态协议，故网站使用cookie保存会话状态信息。发起关于网站用户页面的请求时，需要携带cookie。
+requests.Session对象可用于保存会话状态。
+Session对象会自动保存会话状态（cookie），可直接使用实例化的Session对象发get、post等请求。
+
+代理：
+    突破IP访问限制
+    隐藏自身IP
+代理相关网站：
+    快代理
+    西祠代理
+    www.goubanjia.com
+代理ip类型
+    http
+    https
+代理ip的匿名度：
+    透明：服务器知道使用了代理，也知道请求的真实ip
+    匿名：服务器知道使用了代理，不知道请求的真实ip
+    高匿：服务器不知道使用了代理，不知道请求的真实ip

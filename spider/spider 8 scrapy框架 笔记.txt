@@ -1,0 +1,93 @@
+scrapy的使用
+    环境安装: pip install scrapy
+    创建工程：scrapy startproject project_name
+    cd project_name
+    在spiders子目录中创建一个爬虫文件
+        scrapy genspider spider_name www.xxx.com
+        编写 spider_name
+            修改start_urls
+            实现 def parse(self, response)方法
+                可直接对response使用xpath解析，xpath解析的结果一定是列表。列表中对象是Selector类型，需用extract()提取字符串
+    执行工程
+        scrapy crawl sipder_name
+        scrapy crawl sipder_name --nolog # 不显示日志，此时程序出错也不会提示，改方法不好可通过修改settings.py文件中的日志等级关掉无用日志
+        # settings.py中设置显示指定类型的日志信息
+        # LOG_LEVEL = 'ERROR'
+    持久化存储：
+        基于终端存储
+            只可以将爬虫文件parse方法的返回值存储到本地的文本文件中
+            存储格式只能为 ('json', 'jsonlines', 'jl', 'csv', 'xml', 'marshal', 'pickle')
+            指令: scrapy crawl xxx - o file_path
+            优点：简单
+            缺点：局限性强
+        基于pipeline存储
+            编码流程：
+                数据解析
+                在 item 类中定义相关的属性
+                将解析后的数据封装存储到item类型对象中
+                将item类型对象提交给管道进行持久化存储的操作
+                在pipeline类的process_item中要将其接收到的item对象中存储的数据进行持久化操作
+                在配置文件中开启管道
+            优点：通用性强
+            pipeline中的一个pipeline类对应将一组数据存储到一个平台或者载体中
+            爬虫文件中提交的item类型的对象最终会提交给哪一个管道类？
+                管道文件中一个管道类对应的是将数据存储到一种平台
+                爬虫文件提交的item只会给管道文件中的第一个被执行的管道类接受
+                管道类的process_item方法中的return item表示将item传递给下一个即将执行的管道类
+
+基于spider的全网站数据爬取：
+  是将网站某板块下的全部页码对应的网页数据进行爬取
+  -实现方式：
+    将所有页面的rl添加到start_urls列表（不推荐）
+    在Spider类的parse方法中手动添加请求(推荐)
+        yield scrapy.Request(url=new_url, callback=self.parse)
+
+scrapy 架构图：https://docs.scrapy.org/en/latest/topics/architecture.html
+    五大核心组件：
+        engine：控制数据流，触发事件
+        scheduler：将requests压入队列
+        downloader：获取web page，返回response
+        spiders: 解析response, 提取 items 或额外的 requests
+        item pipelines：处理item，比如数据清洗、持久化存储
+
+使用传参：
+    使用场景：如果需解析的数据不在同一页面中（深度爬取）
+    通过在上层解析中用 yield scrapy.Request(detail_url, callback,meta={'item': item})可将meta参数传递给下一层解析。下一层解析通过response.meta获取meta字典，取出内部数据
+
+(伪属性)图片缓加载：
+    如果图片还未显示在可见区域，则img标签的属性键名为src2。如果出现在可见区域，则src2变为src
+
+图片数据爬取之ImagesPipeline
+    基于scrapy爬取字符串类型的数据和
+
+
+图片数据爬取之ImagesPipeline
+    基于scrapy爬取字符串类型的数据和爬取图片类型的数据区别?
+        字符串: 只需要基于xpath进行解析且提交管道进行持久化存储
+        图片: xpath解析出图片src的属性值。单独的对图片地址发起请求获取图片二进制类型的数据，提交item交由ImagesPipeline子类处理
+ImagesPipeline:
+    只需要将img的src的属性值进行解析，提交到管道，管道就会对图片的src进行请求发送获取图片的二进制数据
+    使用流程:
+        数据解析(图片的地址)
+        将存储图片地址的item提交到制定的管道类
+        在管道文件中自定制一个基于ImagesPipeline的-个管道类
+        get_media_request
+        file_path
+        item_completed
+    在配置文件中:
+        指定图片存储的目录: IMAGES_ STORE = './img_dic'
+        指定开启的管道: 自定制的管道类
+
+中间件：
+    下载中间件(middlewares.py中的MiddleDownloaderMiddleware类)
+        位置:引擎和下载器之间
+    作用: 批量拦截到整个工程中所有的请求和响应
+        拦截请求:
+            - UA伪装 (重写 process_request)
+            - 代理IP (重写 process_request 或 process_exception)
+        拦截响应:
+            篡改响应数据，响应对象
+
+
+增量式爬虫核心：
+    检测信息是否已经爬取过，可借用python的set或者数据库查询历史记录

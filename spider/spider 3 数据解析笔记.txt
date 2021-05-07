@@ -1,0 +1,64 @@
+爬虫流程：
+    指定URL
+    发请求
+    收响应
+    解数据
+    存数据
+
+数据解析方法分类：
+    正则（各编程语言都可以用）
+    bs4(python独有)
+    xpath(重点，各种编程语言都可用)
+
+bs4.BeautifulSoup 提供的方法和属性：
+    实例化BeautifulSoup的方法
+        本地html文件
+            例 BeautifulSoup(file)
+        通过url获取到的html文本
+            例 BeautifulSoup(response.text)
+    定位区域：
+        1.按标签+属性查找
+            soup.tag_name： 返回第一次出现的tag_name对应的标签
+            soup.find(tag_name, {attribute: value})： 返回第一次出现的tag_name对应的标签
+            soup.find_all(tag_name, {attribute: value}): 返回所有找到的元素的列表
+            例 soup.find('div', {'class': 'chapter_content'})，查找class='chapter_content'的div标签，然后返回
+        2.CSS选择器
+            soup.select
+            例 soup.select('.chapter_content > p')，查找class='chapter_content'下的所有p标签，组成列表后返回
+    获取标签之间的文本数据
+        1.只获取标签的直系结点的文本内容
+            tag.string
+        2.递归获取标签内的所有文本内容
+            tag.text
+            tag.get_text()
+    获取标签中的属性值
+        soup.tag_name['attribute']
+
+使用xpath解析数据
+    步骤
+        1.实例化 lxml.etree 对象
+        2.使用etree对象的xpath方法结合xpath表达式解析数据
+    实例化etree对象的方法
+        用本地HTML文件实例化
+            etree.parse(some_file_or_file_like_object)
+        用request得到的html数据实例化
+            etree.HTML(response.text)
+    xpath表达式的用法
+        指定层级： .当前节点 /根节点或单层级，//跨层级
+        指定属性： tag[@attr_name="attr_value"]，属性值必须用双引号包围，不能用单引号
+        索引定位： tag[index] 索引从1开始
+        取文本
+            /text() 获取直系文本
+            //text() 递归获取所有文本
+        取属性
+            /@attr_name
+        或运算符
+            |
+            例如 expression1 | expression2
+        例 tree.xpath('.//div[@class="bottom"]/ul//li/a/text()')
+
+爬取网页时遇见中文乱码问题的解决办法：
+    1. 如果是requests.get()或post()等方法得到的html乱码，则可修改response.encoding
+        response.encoding = 'gbk' 或 response.encoding = 'utf-8'
+    2. 如果想修改编码python的str类型编码，可使用
+        string.encode('ISO-8859-1').decode('gbk')

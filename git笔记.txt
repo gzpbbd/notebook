@@ -1,0 +1,24 @@
+git 是版本管理工具。git 安装目录的 bin 目录中有 sh.exe，可以使用 linux 的命令查找 windows 下的文件
+p4merge、meld 都是可用于 diff 与 merge 的工具。p4merge更方便 merge，meld更方便对比文件夹。
+putty 是用于 ssh 连接与 ssh key 管理工具
+git extensions 是一个方便的 git 可视化工具
+
+1. 下载安装 git、putty、p4merge，记住安装路径
+2. 下载安装 git extensions
+3. 配置 git extensions 中的各种工具：点击 tools -> git extensions:
+    配置 git
+    配置 mergetool、difftool 都为 p4merge
+    配置 linux tools(sh) 为 git 安装目录的 bin 目录下的 sh.exe
+    
+git extensions 配置 remote repository ： 
+    https://git-extensions-documentation.readthedocs.io/en/release-3.4/remote_feature.html    
+    
+git extensions 配置 proxy:
+    tools -> plugins -> proxy switcher 输入http proxy 与 http proxy port
+    
+git extensions 创建 repository 时：    
+    personal repository：有 .git 和其他文件
+    A personal repository looks the same as a normal working directory but has a directory named .git at the root level containing the version history. This is the most common repository.
+    
+    central repository: 只有 .git，没有其他文件 
+    Central repositories only contain the version history. Because a central repository has no working directory you cannot checkout a revision in a central repository. It is also impossible to merge or pull changes in a central repository. This repository type can be used as a public repository where developers can push changes to or pull changes from.

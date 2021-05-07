@@ -1,0 +1,72 @@
+python中用于requests的库有两个：
+    - urllib：相对更老，使用更繁琐
+    - requests：更新，使用更简单
+
+requests库中最常用的方法有两个：
+    - requests.get()：对应了http协议的 GET request，常用参数是url,params,headers,
+    - requests.post()：对应了http协议的 POST request，常用参数是url,data,headers,
+这两个方法的返回类型都是requests.Response。Response的常用方法又有两个：
+    - Response.text：以unicode类型返回response的内容
+    - Response.json()：返回request得到的json类型数据，如果response中不是json类型，会报错。
+
+UA伪装：由于有些网站会根据request header中的user-agent字段判断request是来自爬虫还是浏览器，从而使用反爬措施。所以一般需要将user-agent设置为正常浏览器的数据。可以使用浏览器的审查元素查看浏览器的user-agent.
+
+有些网站通过主页url获取主页后，通过XHR（XMLHttpRequest）更新局部数据，实现网页的局部修改。
+可通过浏览器的审查元素，查看是否有XHR帧及XHR帧的response，判断数据是否由XHR生成。另外，如果网页局部修改后，网址未变，则很可能是使用了XHR获取数据。
+可通过XHR的response headers的content-type字段得知response中数据的类型
+
+requests.get()的params参数，会用于填充url
+requests.post()的data参数，不会用于填充url
+
+例1. 用 requests.get 获取搜狗浏览器查询结果
+#UA检测
+#UA（user-agent）伪装：伪装为正常浏览器
+
+import requests
+if __name__ == '__main__':
+    # 1. url
+    url = 'https://www.sogou.com/web'
+    # 2. UA伪装
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36'
+    }
+    # 3. params参数
+    kw = input('entry a word:')
+    param = {
+        'query':
+    }
+    # 4. 获取response
+    response = requests.get(url=url, params=param, headers=headers)
+    # 5. 解析数据
+    page_text = response.text # 获取html
+    # 6. 持久化存储
+    file_name = kw + '.html'
+    with open(file_name, 'w', encoding='utf-8') as fp:
+        fp.write(page_text)
+    print(file_name, 'saved succeedly!!!')
+
+例2. 用 requests.post 获取百度翻译结果
+import requests
+import json
+
+if __name__ == '__main__':
+    # 1. url
+    post_url = 'https://fanyi.baidu.com/sug'
+    # 2. UA伪装
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36'
+    }
+    # 3. post请求参数处理
+    word = input('enter a word:')
+    data = {
+        'kw': word
+    }
+    # 4. send request
+    response = requests.post(url=post_url, data=data, headers=headers)
+    # 5. get data: json()返回objective(如果确认响应数据是json类型，才能用json())
+    dic_obj = response.json()
+    # 6. save
+    file_name = word + '.json'
+    with open(file_name, 'w', encoding='utf-8') as fp:
+        json.dump(dic_obj, fp=fp, ensure_ascii=False)
+    print('done。')

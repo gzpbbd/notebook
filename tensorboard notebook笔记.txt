@@ -1,0 +1,16 @@
+writer = torch.utils.tensorboard.SummaryWriter(LOG_DIR)
+
+SummaryWriter 提供的方法：
+    add_image(tag, img_tensor, global_step=None, walltime=None, dataformats='CHW')
+    add_graph(model, input_to_model=None, verbose=False)
+    add_embedding(mat, metadata=None, label_img=None, global_step=None, tag='default', metadata_header=None)
+    add_figure(tag, figure, global_step=None, close=True, walltime=None)
+    add_scalar(tag, scalar_value, global_step=None, walltime=None, display_name='', summary_description='')
+    add_pr_curve(tag, labels, predictions, global_step=None, num_thresholds=127, weights=None, walltime=None)
+
+运行tensorboard:
+    tensorboard --logdir=log_dir
+将本地端口绑定到服务器端口：
+    ssh    -L local_port:server_ip:server_port    user_name@server_ip
+浏览器查看 tensorboard:
+    http://localhost:6006

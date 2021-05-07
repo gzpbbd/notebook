@@ -1,0 +1,118 @@
+类 torch.Tensor:
+    is_cuda()
+    grad()
+    device('cuda', 0)
+    dtype()
+    cpu(memory_format=torch.preserve_format) → Tensor
+    cuda(device=None, non_blocking=False, memory_format=torch.preserve_format) → Tensor
+    to(device=None, dtype=None, non_blocking=False, copy=False, memory_format=torch.preserve_format) → Tensor
+    dim() → int
+    item() → number
+    tolist() → list or number
+
+模块 torch:
+    as_tensor
+    from_numpy
+    ones
+    ones_like
+    t 转置
+    where
+    squeeze
+    unsqueeze
+    save
+    load
+    no_grad
+    enable_grad
+    数学操作 add, add_ , sub, sub_ 等
+    max
+    argmax
+	gather 按照indeces从tensor中挑选数据聚为tensor
+	detach 将tensor从计算图中分离出来，不需要计算梯度
+	max(input, dim, keepdim=False, *, out=None) -> (Tensor, LongTensor) 返回的元祖第一个数据才是max后的tensor 
+
+
+类 torch.nn.Module：
+    train(mode: bool = True) → T 设置模型在training模式
+    eval() → T
+    zero_grad(set_to_none: bool = False) → None
+    forward(*input: Any) → None
+    state_dict(destination=None, prefix='', keep_vars=False)
+    load_state_dict(state_dict: Dict[str, torch.Tensor], strict: bool = True)
+    cpu
+    cuda
+    to
+    named_parameters(prefix: str = '', recurse: bool = True) → Iterator[Tuple[str, torch.Tensor]]
+    parameters(recurse: bool = True) → Iterator[torch.nn.parameter.Parameter]
+        This is typically passed to an optimizer.
+    modules() → Iterator[torch.nn.modules.module.Module]
+    named_modules()
+
+层：
+torch.nn.Conv2d(in_channels: int, out_channels: int, kernel_size: Union[T, Tuple[T, T]])
+torch.nn.MaxPool2d(kernel_size: Union[T, Tuple[T, ...]])
+torch.nn.Linear(in_features: int, out_features: int)
+
+损失：
+    torch.nn.CrossEntropyLoss()  This criterion combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
+        所以网络的最后一层不需要添加激活函数
+
+优化器 torch.optim.SGD(params, lr=<required parameter>):
+    step()
+
+模块 torch.cuda：
+    is_available() → bool
+    device_count() → int
+    current_device() → int
+
+模块 torchvision.transforms：用于图片转换
+    Compose(transforms)
+    ToTensor()
+    normalize(tensor: torch.Tensor, mean: List[float], std: List[float])
+
+
+torch.utils.data.DataSet
+torch.utils.data.DataLoader
+torch.nn.Module
+torch.nn.Linear
+torch.nn.CrossEntropyLoss
+torch.optim.SGD
+torch.nn.Sequential
+torch.nn.AvgPool2d 指定核形状和步长
+torch.nn.AdaptiveAvgPool2d 指定输出形状，自动推断核形状和步长
+
+使用GPU时，需要把模型和样本移入GPU
+
+打印网络梯度：
+	for name, param in net.named_parameters():
+		print('{} grad {}'.format(name, param.grad))
+
+如何在服务器上远程使用tensorboard:
+    连接ssh时，将服务器的6006端口重定向到自己机器上来：
+        ssh -L 16006:127.0.0.1:6006 username@remote_server_ip
+		
+一些方便的函数：
+	np.random.choice() 可以按指定概率从范围中选值
+
+保存数据：
+	（1）
+	torch.save(model.state_dict(), PATH) # 保存的是什么类型，读出的就是什么类型
+	# ----
+	model.load_state_dict(torch.load(PATH))
+	（2）
+	torch.save({
+				'epoch': epoch,
+				'model_state_dict': model.state_dict(),
+				'optimizer_state_dict': optimizer.state_dict(),
+				'loss': loss,
+				...
+				}, PATH) # 保存了一个字典
+	# ----
+	checkpoint = torch.load(PATH) # checkpoint是一个字典
+	model.load_state_dict(checkpoint['model_state_dict'])
+	optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+	epoch = checkpoint['epoch']
+	loss = checkpoint['loss']
+			
+	
+	
+

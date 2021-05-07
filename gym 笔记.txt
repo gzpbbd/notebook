@@ -1,0 +1,29 @@
+模板：
+import gym
+env = gym.make('CartPole-v0')
+for i_episode in range(20):
+    observation = env.reset()
+    for t in range(100):
+        env.render()
+        print(observation)
+        action = env.action_space.sample()
+        observation, reward, done, info = env.step(action)
+        if done:
+            print("Episode finished after {} timesteps".format(t+1))
+            break
+env.close()
+
+gym用Space类型描述有效的动作和状态
+env.action_space 动作空间
+env.observation_space 状态空间
+
+gym.spaces.Discrete 固定范围的非负数，Discrete(n)表示取值范围为0, 1, ..., n-1。gym.spaces.Discrete(m).n 表示有效动作的个数，为m。
+gym.spaces.Box 表示有多个维度的空间，Box(n)表示有n个维度。
+
+env.observation_space.high、env.observation_space.low 表示Box各维度的上下边界
+
+gym.envs.registry.all() 查看已经安装的环境
+env.unwrapped 允许访问环境内部的数据
+
+
+在 CartPole-v0 中，如果不使用 env.unwrapped，则每个回合最大轮次为 200

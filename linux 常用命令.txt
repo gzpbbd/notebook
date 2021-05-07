@@ -1,0 +1,254 @@
+权限相关：
+    sudo su 使用超级用户权限
+    chmod 777 filename 修改文件权限
+    adduser username 添加用户
+    userdel username 删除用户
+    su another_username 切换用户
+	passwd 改密码
+	su 切换为 root 用户，需输入 root 的密码
+	sudo su 获取权限，需输入当前用户的密码
+    ssh 免密登陆其他服务器 https://blog.csdn.net/universe_hao/article/details/52296811
+
+
+
+查找信息：
+	echo $PATH 查看当前环境变量的值
+    ps -ef 查看所有进程详细信息
+    ps -u user_name 查看用户运行的进程
+    ls -al 查看文件详细信息
+    grep -i "content" filename 搜索内容，-i 为ignore 大小写
+    top 类似于windows的任务管理器，查看cpu运行情况
+    watch -n 2 nvidia-smi 查看gpu运行情况
+	gpustat -cup 显示gpu信息（需要 pip install gpustat）
+	find path -iname 文件名或正则表达式 查找指定路径下的文件
+	dpkg --print-architecture 查看系统架构
+	pwd 查看当前路径的全名称
+	
+
+
+
+文件相关
+    touch a.txt
+    mkdir dir_name 创建文件夹
+    rm -r file_name 删除文件，-r表示递归删除
+    mv a.txt c.txt
+    cp a.txt b.txt
+    tar -czvf xxx.tar.gz files 压缩文件
+	tar -xzvf xxx.tar.gz -C to_path 解压文件
+    rar a etc.rar /etc 压缩文件
+    unrar x file.rar 解压文件
+	unzip 压缩包名 解压文件
+	du -h -d 1 path 查看路径下的文件的磁盘占用大小
+	scp -r [[user@]host1:]file_source  [[user@]host2:]file_target  服务器间的文件拷贝
+	rsync -av SRC [USER@]HOST::DEST 服务器间的文件同步
+	rsync -av [USER@]HOST::SRC DEST 
+
+
+运行、安装、配置：
+    nohup command & 不挂起（no hang up）、后台执行命令
+    source 加载文件
+    pip install --upgrade package
+	rpm 是Red Hat Linux 的套件管理程序
+	rpm -qa | grep -i java 查询是否安装了 java
+	yum install -y package_name 在centos安装软件包（-y 全部选择yes）
+	安装 java、hadoop 等，只需要将 .tar.gz 文件解压，然后设置环境变量 PATH 
+	
+环境变量配置文件：
+	1.系统级：
+	（1）/etc/profile：该文件是用户登录时，操作系统定制用户环境时使用的第一个文件，应用于登录到系统的每一个用户。该文件一般是调用/etc/bash.bashrc文件。
+	/etc/bash.bashrc：系统级的bashrc文件。
+	（2）/etc/environment:在登录时操作系统使用的第二个文件,系统在读取你自己的profile前,设置环境文件的环境变量。
+
+	2.用户级（这些文件处于家目录下）：
+	（1）~/.bash_profile or ~./bash_login：如果它们存在，则会执行它们，而忽略 ~/.profile
+		~/.profile:当用户登录时,该文件仅执行一次! 默认情况下,他设置一些环境变量,执行用户的.bashrc文件。这里是推荐放置个人设置的地方
+	（2）~/.bashrc:该文件包含专用于你的bash shell的bash信息,当登录时以及每次打开新的shell时,该该文件被读取。不推荐放到这儿，因为每开一个shell，这个文件会读取一次，效率肯定有影响。
+	
+	
+
+网络：
+	对用户环境设置代理：~/.bashrc 文件末尾加入以下内容，然后重开终端
+		http_proxy=http://10.12.42.156:7890
+		https_proxy=https://10.12.42.156:7890
+		export http_proxy
+		export https_proxy	
+	
+	speedtest --bytes 测网速(要先 pip install speedtest-cli)
+    netstat -rn 查看路由表
+	netstat -ap | grep port_num 查看使用指定端口的进程
+
+    linux 设置代理服务器
+		export https_proxy="10.12.42.156:7890"
+		export http_proxy="10.12.42.156:7890"
+
+		export socks_proxy="10.12.42.156:7890"
+		
+	修改网络IP为静态IP：修改/etc/sysconfig/network-scripts/ifcfg-ens33 中的BOOTPROTO="static"，末尾加上IPADDR=X.X.X.X,GATEWAY=X.X.X.X,DNS1=X.X.X.X
+	
+	
+	修改主机名称 /etc/hostname
+	修改主机名与IP的映射（相当于局域网的DNS） /etc/hosts
+	hostname 查看主机名
+	hostname -i 查看主机IP
+
+	set http_proxy=http://127.0.0.1:7890 & set https_proxy=http://127.0.0.1:7890
+		
+	windows CMD设置代理
+	set http_proxy=http://127.0.0.1:7890
+	set https_proxy=http://127.0.0.1:7890
+	
+	ping www.baidu.com
+	tracert www.baidu.com 查看经过的路由
+	nslookup www.baidu.com 查看URL对应的ip。返回的是DNS服务器与目的URL IP
+	
+开关机 
+	reboot 重启
+	halt 关机
+
+源： 
+	ubuntu 20.04 更换 apt 阿里源（不用版本的源配置不一样）
+	sudo vim /etc/apt/sources.list
+	粘贴：
+		deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+		deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+		deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+		deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+		deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+		deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+		deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+		deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+		deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+
+	更新软件列表 sudo apt-get update
+	更新软件包 sudo apt-get upgrade
+
+进程相关：
+    killall 进程名
+    kill 进程id
+	
+	gpustat -cpu 查看哪些在用gpu
+	ls -al /proc/32433/exe 找到pid 32433 对应的运行程序
+	
+VMWare:
+	虚拟机位置 E:\Users\huangchenping\Documents\Virtual Machines\
+	复制虚拟机：复制 vmx 与 vmdk 为后缀的文件
+
+conda
+    conda create -n your_env_name python=X.X（2.7、3.6等)
+    conda env list 查看所有虚拟环境
+    conda remove -n your_env_name(虚拟环境名称) --all 删除虚拟环境
+    source activate env_name linux激活
+    conda activate env_name windows激活
+    conda deactivate
+	conda search package 搜索包的可安装版本
+	
+    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+	conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge 
+	conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+    conda config --set show_channel_urls yes
+	
+	conda config --show-sources
+	conda config --remove channels  https://mirrors.aliyun.com/pypi/simple/
+	
+
+    修改pip源
+        在用户或者根目录下创建 .pip/pip.conf 文件，写入
+        [global]
+        index-url = http://mirrors.aliyun.com/pypi/simple/
+        [install]
+        trusted-host=mirrors.aliyun.com
+
+安装jupyter核有两种办法：
+    1：使用 nb_conda
+        https://blog.csdn.net/it_xiao_bai/article/details/102765922
+    2: 使用 ipykernel
+        https://blog.csdn.net/u012428169/article/details/103046857
+
+        jupyter 命令:
+            pip install ipykernel
+            jupyter kernelspec list
+            python -m ipykernel install --user --name 环境名
+            jupyter kernelspec remove envname
+
+
+linux安装tensorflow-gpu：
+    使用 conda install tensorflow-gpu 安装会自动安装对应的cuDNN与cuda（在安装列表里面可以看到cuDNN与cuda存在）
+
+    注： 测试是否使用了gpu
+import tensorflow as tf
+
+a = tf.test.is_built_with_cuda()
+b = tf.test.is_gpu_available(cuda_only=False, min_cuda_compute_capability=None)
+print(a,b)
+
+
+
+
+pycharm连接服务器：
+    1.选择ssh解释器 /home/huangchenping/softward/anaconda3/envs/tf1/bin/python
+    2.部署sftp映射，同步文件
+    3.在 run -> config 中对对应的python文件添加环境变量
+        ;LD_LIBRARY_PATH=/usr/local/cuda/lib64;
+
+
+docker 概念：
+	image 不同应用的文件
+	container 运行image的实体
+	可用一个 image 启动多个 container
+
+docker 命令:
+    docker version
+    docker info
+    docker pull image_name 下载image
+    docker search image_name 搜索image
+    docker run -it image_name command_name 交互式运行容器，执行命令
+    docker run -d image_name 后台运行容器。容器使用后台运行，就必须要有一个前台进程。docker发现没有应用，就会自动停止
+	docker run 的参数
+		-i, --interactive=false， 打开STDIN，用于控制台交互
+		-t, --tty=false， 分配tty设备，该可以支持终端登录，默认为false
+		-d, --detach=false， 指定容器运行于前台还是后台，默认为false
+		--restart="no"， 指定容器停止后的重启策略:
+					no：容器退出时不重启
+					on-failure：容器故障退出（返回值非零）时重启
+					always：容器退出时总是重启		
+		--name=""， 指定容器名字，后续可以通过名字进行容器管理，links特性需要使用名字
+		--net="bridge"， 容器网络设置:
+					bridge 使用docker daemon指定的网桥
+					host //容器使用主机的网络		
+		-v, --volume=[本地路径：容器路径]， 给容器挂载存储卷，挂载到容器的某个目录。
+		-p, --publish=[本地端口：容器端口]， 指定容器暴露的端口
+	
+	docker images -a 查看有哪些容器
+    
+	docker ps 显示当前运行的容器
+    docker ps -a 显示所有容器
+    docker ps -aq 显示所有容器的ID
+	docker container ls 查看容器状态
+    
+	docker rmi image_id 删除image
+    docker rmi -f image_id 强制删除image
+    
+	docker rm container_id 删除容器
+    docker rm -f container_id 强制删除容器
+    docker rm -f $(docker ps -aq) 强制删除所有容器
+    
+	docker start container_id 启动容器
+    docker restart container_id 重启容器
+    docker stop container_id 停止容器
+    docker kill container_id 杀掉容器
+    
+	docker logs container_id 查看日志
+    docker logs -t container_id 查看日志，带时间戳
+    
+	docker top container_id 查看容器的进程
+    docker inspect container_id 查看容器信息
+    docker exec -it container_id /bin/bash 进入容器，开启新的终端
+    docker attach container_id 进入容器，进入正在执行的终端，不会启动新的进程
+    docker cp container_id:resource_path destination_path 将容器内文件拷贝到本地文件系统中
+    docker cp destination_path container_id:resource_path 将本地文件系统内文件拷贝到容器中
+    docker run -d --name nginx01 -p 3344:80 nginx 后台运行nginx
+        -d 后台运行
+        --name 给容器取名
+        -p 暴露端口 local_system:container
+    docker stats 查看运行的容器状态
+	docker commit -m comments container_id repository_name:version.minor

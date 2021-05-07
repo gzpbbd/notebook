@@ -1,0 +1,73 @@
+NLU data: 定义意图，并提供一些意图样本
+response: 定义回应。提供回应的文本，如果一个response有多个可选的text选项，则会随机选一个text选项。
+stories: 定义问答流程。会考虑用户之前说过的话。
+forms: 定义需要收集的信息
+rules: 定义针对特定意图的回应。不考虑用户之前说过的话。
+
+rasa 使用 YAML 格式管理训练数据：NLU data, stories, rules, domain(responses, forms)
+    注意：和版本1的定义格式不一样
+
+rasa团队将对话机器人分为了五个层次：
+    简单机器人：只会发固定的通知
+    FAQ机器人：会进行FAQ问答
+    语境机器人：会考虑之前用户说过的话
+    定制机器人：会熟悉用户，记住用户的偏好
+    通用机器人：啥都会
+
+    rasa 现在聚焦于 语境机器人
+
+NLU 负责理解用户说的话。
+rasa core（对话管理器）负责根据stories与语境，决定机器人的回应。
+rasa X 提供了便利的工具，用于收集现实的对话，分析对话，迭代对话机器人
+
+命令：
+    rasa init 初始化一个情绪机器人项目
+
+rasa 的训练数据的顶级关键字：
+    version
+    nlu
+    stories
+    rules
+
+---
+
+
+
+
+
+
+
+
+编写故事可能需要改动的文件
+    story, rule(stories.yml, rules.yml)
+        intent (nlu.yml, domain.yml)
+        response (domain.yml)
+        action (actions.py, domain.yml, endpoints.yml)
+
+custom_action 接收到的是tracker等信息，返回的是一个event列表
+    tracker: 记录conversation的信息。包含了当前的slots和之前的events
+    events: rasa将conversation表示为一系列的event。一些典型event如下：
+        user: user发送一个message给bot
+        slot: 设置单个slot
+        bot: bot发送一个message给user
+        action: policies判断出bot应执行的action
+        session_started: 开始一个新的session
+        rewind: 从tracker中删除最近一条用户消息和该消息的所有影响
+
+custom_action.run的参数：
+    tracker： 包含了conversation的信息
+    dispatcher: 用于给user发message。method为dispatcher.utter_message(...)
+
+rasa训练policy时选择的特征为：
+    用户输入的意图
+    用户输入的实体
+    上一个系统action或bot的utterance
+    slots
+    active form
+policy预测actions应该是对于每个用户的message，预测多个actions，直到action为action_listen为止
+
+rasa的一些默认action:
+    action_default_fallback: 撤销最近的一轮 user-bot 交互。具体操作是生成一个 rewind 事件。
+
+测试：
+    一句话中两个同名实体：都会识别出来。

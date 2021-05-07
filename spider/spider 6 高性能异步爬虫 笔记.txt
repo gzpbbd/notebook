@@ -1,0 +1,32 @@
+异步爬虫：
+    多进程，多线程（不建议）
+        弊端：无法无限制的开启多进程或多线程
+    线程池，进程池（适当使用）
+        降低对进程/线程创建和销毁的频率
+        弊端：进程/线程数有上限
+    单线程+异步协程（推荐）
+
+
+单线程+异步协程
+    event_loop
+    coroutine：协程对象
+    task： 对协程对象的进一步封装
+    future：代表还未执行的task
+    async：定义协程
+    await：用来挂起阻塞方法的执行
+
+在协程的代码中不能使用进行同步操作的模块。requests是同步操作的模块，所以需要使用其他异步操作的网络请求模块(aiohttp)
+
+
+python的进程线程模块梳理：
+    threading
+        线程模块，可用于手动创建线程。为了便于线程管理，CPython(标准python)使用了Global Interpreter Lock（GIL）对线程加锁，控制每个时刻只有一个线程能被cpu执行
+    multiprocessing
+        1. 进程模块，可用于手动创建进程。
+        2. 提供了进程池 multiprocessing.pool.Pool类。而multiprocessing.Pool是一个用于创建进程池 multiprocessing.pool.Pool类的简便方法。
+    multiprocessing.dummy
+        1. 是threading模块的包装器。提供了与 multiprocessing 模块相同的API。
+        2.提供了线程池 multiprocessing.pool.ThreadPool类。而multiprocessing.dummy.Pool是一个用于创建线程池multiprocessing.pool.ThreadPool类的简便方法。
+
+multiprocessing.pool.ThreadPool 也会受GIL的限制。
+经测试，进程池比线程池开销大很多。如果只是为了解决IO密集型任务，使用线程池更好。如果是计算密集型任务，建议使用进程池，开的进程数量等于CPU支持的thread即可。

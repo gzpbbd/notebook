@@ -1,0 +1,12 @@
+pandas:
+    read_csv(filepath_or_buffer[, sep, …], index_col=False, sep=' ', header=2)
+series:
+    value_counts() 计算每个类别的数量
+    iloc 选取行，如series.iloc[2]，选取index=2的行
+DataFrame:
+    loc 例如，loc[1, 'name']
+    index
+    columns
+    info([verbose, buf, max_cols, …]) 数据概述
+    shape
+    apply(func[, axis, raw, …])

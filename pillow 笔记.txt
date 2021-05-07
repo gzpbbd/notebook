@@ -1,0 +1,12 @@
+图片类 PIL.Image
+
+Image类
+    常用属性
+        size
+        mode
+    常用方法
+        open()
+        new()
+        paste()
+        crop()
+        save()

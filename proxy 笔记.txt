@@ -1,0 +1,135 @@
+ssr 重要参数：
+	server_prot 服务器地址
+	password 密码
+	method/encryption/cipher 加密方法。将数据加密为非原始数据。aes-xxx-gcm 加密方法比较好
+		下列列表来自 2021.4.9 https://github.com/Dreamacro/clash/wiki/configuration
+		aes-128-gcm aes-192-gcm aes-256-gcm
+		aes-128-cfb aes-192-cfb aes-256-cfb
+		aes-128-ctr aes-192-ctr aes-256-ctr
+		rc4-md5 chacha20-ietf xchacha20
+		chacha20-ietf-poly1305 xchacha20-ietf-poly1305		
+	
+	protocol 加密和验证方法。？比如auth_aes128_sha1是结合了aes与sha算法。origin是无协议（原ss）
+		下列列表来自 2017年11月12日 https://doubibackup.com/3-8zn06g-2.html#comments
+		"origin"	原版协议
+		"verify_deflate"	带压缩的协议
+		"auth_sha1_v4"	支持兼容原版，类似"auth_sha1"，提供更好的长度混淆特性
+		"auth_aes128_md5"	推荐！但不支持兼容原版
+		"auth_aes128_sha1"	推荐！但不支持兼容原版
+		"auth_chain_a"	推荐！但不支持兼容原版
+		"auth_chain_b"	推荐！但不支持兼容原版		
+	
+	obfs 混淆。伪装成其他协议.plain是不伪装（原ss）
+		下列列表来自 2017年11月12日 https://doubibackup.com/3-8zn06g-2.html#comments
+		"plain"	不混淆
+		"http_simple"	伪装为http协议
+		"tls_simple"	伪装为tls协议（不建议使用）
+		"random_head"	发送一个随机包再通讯的协议
+		"tls1.2_ticket_auth"	伪装为tls ticket握手协议（强烈推荐），同时能抗重放攻击		
+	
+	例子
+		{
+			"server_port": 9000,
+			"password": "9700",
+			"method": "aes-256-ctr",
+			"protocol": "origin",
+			"obfs": "plain",
+			
+			
+			"server": "0.0.0.0", //10.12.42.147
+			"server_ipv6": "::",
+			"local_address": "127.0.0.1",
+			"local_port": 1080,
+
+			"protocol_param": "",
+			"obfs_param": "",
+			"speed_limit_per_con": 0,
+			"speed_limit_per_user": 0,
+
+			"additional_ports" : {}, // only works under multi-user mode
+			"additional_ports_only" : false, // only works under multi-user mode
+			"timeout": 120,
+			"udp_timeout": 60,
+			"dns_ipv6": false,
+			"connect_verbose_info": 0,
+			"redirect": "",
+			"fast_open": false
+		}
+		
+
+
+v2ray作者2019年失踪，github停更，社区人员重新组建了v2fly.org
+
+
+
+win10 代理设置：
+	windows 10 得在 control 面板 -> network option -> connection -> lan > proxy 设置代理才有用。直接在新界面的proxy setting 是无用的。不知道为什么。
+
+clash for windows:
+	clash for windows 会自动给在本地开启一个http代理，用于给浏览器用。socks代理不知道有没有开启。
+	在另外的电脑上，通过control pannel 设置 http 代理为clash for windows的代理，浏览器可以上网。但curl 与 ping 均无法连网。
+	如果只设置socks代理为clash for windows开的代理，则浏览器也无法上网。
+
+
+	clash 中 proxies group 的作用：组合节点，形成一个新的节点。
+		type: select 的 group：，需要自己选择该group的一个节点。之后使用该group时，就是使用该被选择的节点节点。
+		type: auto-select：会按照设定的interval（秒?）自动选择group内到到指定url延迟最小的节点。节点是会定期变换的。
+
+	clash 先用 setting 里的 bypass 过滤。余下的，才走代理。代理又分为global、rule、direct、script。
+		global：选择一个节点，然后所有请求都走该节点
+		rule: 按照 profile 文件中的 rules 进行过滤。rules 是按照顺序从上到下依次查找，直到找到第一个符合的规则，按其转发出去。
+		direct: 全部直连，不走代理。
+	
+
+
+bypass:
+  - localhost
+  - 127.*
+  - 10.*
+  - 172.16.*
+  - 172.17.*
+  - 172.18.*
+  - 172.19.*
+  - 172.20.*
+  - 172.21.*
+  - 172.22.*
+  - 172.23.*
+  - 172.24.*
+  - 172.25.*
+  - 172.26.*
+  - 172.27.*
+  - 172.28.*
+  - 172.29.*
+  - 172.30.*
+  - 172.31.*
+  - 192.168.*
+  - <local>
+
+  - "*zhihu.com"
+  - "*csdn.net"
+  - "*baidu.com"
+  - "*edu.cn"
+  - "*bing.com"
+  - "*youku.com"
+  - "*.com.cn"
+  - "*taobao.com"
+  - "*douban.com"
+  - "*.xiao84.com"
+  - "*gitee.com"
+  - "*gitee.io"
+  - "*cnblogs.com"
+  - "*jianshu.com"
+  - "*sohu.com"
+  - "*sogou.com"
+  - "*qq.com"
+  - "*tencent.com"
+  - "*com.cn"
+  - "*iflyos.cn"
+	
+docker 搭建 v2fly。失败，客户端socks代理通不了。两端都只显示	V2Ray 4.37.3 started
+
+
+
+clash for windows 配置文件说明: https://github.com/Dreamacro/clash/wiki/configuration
+
+

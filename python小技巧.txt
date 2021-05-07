@@ -1,0 +1,28 @@
+tqdm.tqdm 加进度条
+    for i in tqdm.tqdm(range(100)): pass
+    在列表、元组等可迭代对象前加*表示拆分为一个个单个元素
+        a = [1, 2, 3]
+        print(a, '|', *a)
+        输出： [1, 2, 3] | 1 2 3
+
+python 类中的实例属性必须使用self指明，而c++与java的只有在必要的时候才需要用this指明
+    input:
+    class Foo:
+    count = 0 # 属于类的属性
+    def __init__(self):
+        self.num = 0 # 属于实例的属性
+    def add(self, n):
+        self.num += n
+
+    a = Foo()
+    b = Foo()
+    a.add(5)
+    b.add(3)
+    a.count += 20 # 不要使用实例修改类的属性，会混淆
+    Foo.count += 10
+    b.count += 7
+    print("Foo.count {}, a.count {}, b.count {}, a.num {}, b.num {}".format(Foo.count, a.count, b.count, a.num, b.num))
+
+   output: Foo.count 10, a.count 20, b.count 17, a.num 5, b.num 3
+
+

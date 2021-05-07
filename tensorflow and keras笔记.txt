@@ -1,0 +1,56 @@
+
+tensorflow.keras
+    keras.backend.function 用于构建从输入到输出的计算图
+            f = K.function(model.inputs, model.layers[2])
+            layer_2_output = f(inputs)
+    utils
+        keras.utils.to_categorical 将类的数字标签转为one-hot编码
+            例：keras.utils.to_categorical([0, 1, 2, 3], num_classes=5)
+            输出：array([[1., 0., 0., 0., 0.],
+                       [0., 1., 0., 0., 0.],
+                       [0., 0., 1., 0., 0.],
+                       [0., 0., 0., 1., 0.]], dtype=float32)
+    输入 keras.Input
+        例 keras.Input(shape=(1980,1080))
+        输出 <tf.Tensor 'input_1:0' shape=(None, 1980, 1080) dtype=float32>
+    layers:
+        Layer 所有层的父类
+            attributes:
+                name
+                dtype
+                trainable_weights
+                non_trainable_weights
+                weights 返回权重变量列表
+                trainable
+                input_spec
+                losses
+                metrics
+                dynamic
+            method:
+                get_weights() 返回numpy.array类型的权重值的列表
+                set_weights(weights) 用numpy.array类型设置层的权重
+                get_config()
+                add_loss(losses, **kwargs)
+                add_metric(value, name=None, **kwargs)
+                get_output_at
+        Activation(activation, **kwargs) 激活层，等价于在其他层中设置activation参数
+            activation 是激活函数
+        Input(shape=(2,3)) 输入的placeholder
+        Embedding(1000, 64, input_length=10))
+        layers.Dense(32, activation='relu')
+        Masking(mask_value=0.) 跳过值全为mask_value的时间步
+        Lambda(function)
+        RepeatVector(n) 将 2D tensor of shape (num_samples, features) 变为 3D tensor of shape (num_samples, n, features).
+        Concatenate(axis=1)([x, y]) 沿着指定轴合并输入张量
+        Dot(axes=(1, 2))([x, y]) 沿着指定轴做向量的点乘，点乘后指定轴会被消掉，The sizes of `x.shape[axes[0]]` and `y.shape[axes[1]]` should be equal
+        LSTM(units, return_sequences=True, return_state=True)
+            whole_seq_output, final_memory_state, final_carry_state = lstm(inputs)
+        Bidirectional(LSTM(10, return_sequences=True), input_shape=(5, 10))
+
+tensorflow
+    变量
+        tf.Variable
+            例 tf.Variable([2, 3], dtype=tf.float32)
+            输出 <tf.Variable 'Variable:0' shape=(2,) dtype=float32, numpy=array([2., 3.], dtype=float32)>
+        tf.ones((2,3))
+    tensor.numpy() 返回numpy类型的值
