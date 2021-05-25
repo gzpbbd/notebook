@@ -27,3 +27,23 @@ env.unwrapped 允许访问环境内部的数据
 
 
 在 CartPole-v0 中，如果不使用 env.unwrapped，则每个回合最大轮次为 200
+
+CartPole v0：https://github.com/openai/gym/wiki/CartPole-v0
+    Balance a pole on a cart.
+    观测：四个连续变量，Cart Position，Cart Velocity，Pole Angle，Pole Velocity At Tip
+    动作: 一个离散值（0或1）
+    
+Pendulum v0: https://github.com/openai/gym/wiki/Pendulum-v0
+    Swing up a pendulum.
+    观测：三个连续变量，cos(theta)，sin(theta)，theta dot
+    动作：一个连续值（-2.0~2.0）
+    
+MountainCar v0：https://github.com/openai/gym/wiki/MountainCar-v0
+    drive up a big hill
+    观测值：两个连续变量，position，velocity
+    动作：一个离散值（0或1或2）
+
+MountainCarContinuous v0：https://github.com/openai/gym/wiki/MountainCarContinuous-v0
+    dirve up a big hill with continuous control
+    观测值：两个连续变量，Car Position，Car Velocity
+    动作：一个连续值（-1.0~1.0）

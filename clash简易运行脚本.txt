@@ -1,0 +1,16 @@
+Linux bash脚本(run.sh) 自动关闭clash并重新执行
+
+
+#!/bin/bash
+pid=$(pgrep clash)
+if [ -n "$pid" ]; then
+    eval 'kill -9 $pid'
+    echo "Kill clash process(PID $pid)"
+fi
+
+out="./nohup.out"
+if [ -f $out ]; then
+   eval 'rm $out'
+fi
+eval 'nohup ./clash -d . > $out 2>&1 &'
+echo "Runing clash. Write output into $out"

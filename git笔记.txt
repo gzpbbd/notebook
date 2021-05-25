@@ -22,3 +22,14 @@ git extensions 创建 repository 时：
     
     central repository: 只有 .git，没有其他文件 
     Central repositories only contain the version history. Because a central repository has no working directory you cannot checkout a revision in a central repository. It is also impossible to merge or pull changes in a central repository. This repository type can be used as a public repository where developers can push changes to or pull changes from.
+    
+    
+github 默认分支名为 main ，而 git 默认分支名为 master。解决方法：
+    1. 在 github 新建一个 repository
+    2. git extensions 将 github 刚才新建的 repository clone 到本地。则本地就不会出现 master 分支了。
+    3. 将自己的文件放入对应的 repository 目录中，commit, push。就好了
+    
+git 的命令：
+    push 本地代码上传到 remote
+    fetch 将 remote 的更新拉取到本地，但是不与本地分支合并。不会对本地代码造成影响。
+    pull 先将 remote 的更新拉去到本地，再与本地分支合并。会对本地代码造成影响。

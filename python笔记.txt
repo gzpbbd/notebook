@@ -12,35 +12,47 @@ python 2 运行出现SyntaxError: Non-ASCII character '\xe8' in file 是因为�
 	test_case = args.test_case
 	
 	
-配置日志的方法：
-	import logging
-	import time
-	import os
+---- 配置日志的方法：
+# 警告：当root logger没有handler时，logging.basicConfig() 会给其添加一个streamHandler，从而可能出现控制台重复输出
+import logging
+import time
+import os
 
 
-	def init_logging(log_dir='log_', extra=''):
-		if not os.path.exists(log_dir):
-			os.makedirs(log_dir)
+def init_logging(log_dir='./log', filename=None, extra=None):
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
-		# std handler
-		stderr_handler = logging.StreamHandler()  # 默认是 stderr
-		stderr_handler.setLevel(logging.DEBUG)
-		# file handler
-		current_filename = __file__.split('/')[-1].replace('.', '_')
-		current_time = time.strftime("%Y-%m-%d %H-%M-%S", time.localtime())
-		file_handler = logging.FileHandler('{}/{}_{}_{}.log'.format(log_dir, extra, current_filename, current_time))
-		file_handler.setLevel(logging.DEBUG)
+    # file handler
+    if filename:
+        file_handler = logging.FileHandler(os.path.join(log_dir, filename), mode='w')
+    else:
+        # current_time
+        current_filename = __file__.split('/')[-1].replace('.', '_')
+        current_time = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
+        file_handler = logging.FileHandler(
+            '{}/{}_{}_{}.log'.format(log_dir, extra, current_filename, current_time))
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        '%(message)s\n                       - %(levelname)s %(asctime)s %(filename)s(%(funcName)s %(lineno)d)'))
 
-		format_str = '%(levelname)s: %(filename)s: %(funcName)s: %(asctime)s:\n    %(message)s'
-		# basicConfig() 必须出现在任何 debug(), info() 等之前，且只有第一次调用有效
-		# logger = logging.getLogger('name')
-		logging.basicConfig(format=format_str, level=logging.DEBUG, handlers=[file_handler, stderr_handler])
+    # stream handle
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+
+    # setting logging
+    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().addHandler(file_handler)
+    logging.getLogger().addHandler(console_handler)
 
 
-	init_logging()
-	logging.debug('debug messages')
-	logging.warning('warning messages')
-	logging.error('error messages')
+init_logging(filename='run.log')
+logging.debug('debug messages')
+logging.warning('warning messages')
+logging.error('error messages')
+
+
 		
 多进程编程：
 	import multiprocessing as mp
