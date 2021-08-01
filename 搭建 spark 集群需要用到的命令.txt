@@ -1,0 +1,80 @@
+启动容器：
+docker run -P -p 10022:22 -p 50070:50070 -p 8080:8080 --privileged --name master  -h master --add-host master:172.17.0.2 --add-host slave01:172.17.0.3 --add-host slave02:172.17.0.4 --add-host slave03:172.17.0.5   -itd centos7:spark_ssh /bin/bash
+docker run -P -p 10023:22 --privileged --name slave01  -h slave01 --add-host master:172.17.0.2 --add-host slave01:172.17.0.3 --add-host slave02:172.17.0.4 --add-host slave03:172.17.0.5 -itd centos7:spark_ssh /bin/bash 
+docker run -P -p 10024:22 -p 8088:8088 --privileged --name slave02  -h slave02 --add-host master:172.17.0.2 --add-host slave01:172.17.0.3 --add-host slave02:172.17.0.4 --add-host slave03:172.17.0.5 -itd centos7:spark_ssh /bin/bash 
+docker run -P -p 10025:22 --privileged --name slave03  -h slave03 --add-host master:172.17.0.2 --add-host slave01:172.17.0.3 --add-host slave02:172.17.0.4 --add-host slave03:172.17.0.5 -itd centos7:spark_ssh /bin/bash 
+
+
+查看各个容器 ip:
+docker inspect -f='{{.Name}} {{.NetworkSettings.IPAddress}} {{.HostConfig.PortBindings}}' $(docker ps -aq)
+
+/slave03 172.17.0.5 map[22/tcp:[{ 10025}]]
+/slave02 172.17.0.4 map[22/tcp:[{ 10024}]]
+/slave01 172.17.0.3 map[22/tcp:[{ 10023}]]
+/master 172.17.0.2 map[22/tcp:[{ 10022}]]
+
+打通ssh:
+    /run.sh
+    ssh xxx 全连通一遍
+
+    NameNode 在 master
+    ResoureManager 在 slave02
+    
+    spark master 在 master
+
+进入容器：
+docker exec -it master bash
+docker exec -it slave01 bash
+docker exec -it slave02 bash
+docker exec -it slave03 bash
+
+cd /usr/local/hadoop/hadoop-2.10.1/
+rm -rf datanode/ namenode/ tmp/ logs/
+
+web 界面：
+    10.12.41.220:50070 hdfs
+    10.12.41.220:8088 yarn
+    10.12.41.220:8080 spark
+    
+工作流程：    
+1. 启动四个container: 开启必要端口，修改hosts 文件
+2. 运行 /run.sh，连接一遍 ssh
+4. 启动 hdfs ，看下有几个启动了 datanode
+5. 启动 yarn， 看下有几个启动了
+6. 启动 spark, 看下有几个启动了
+7. 上传 iris.txt 文件
+8. 运行 spark kmeans.py 程序
+
+安装 pip
+    yum -y install epel-release
+    yum -y install python-pip
+安装 numpy
+     python -m pip install numpy==1.11
+上传文件到 hdfs:
+    hdfs dfs -mkdir -p /user/root/data/mllib/
+    hdfs dfs -put data/mllib/sample_kmeans_data.txt /user/root/data/mllib/sample_kmeans_data.txt
+    
+    
+单机运行 kmeans:
+    cd /usr/local/spark/spark-2.4.8-bin-without-hadoop/ 
+    hdfs dfs -cat /user/root/data/mllib/sample_kmeans_data.txt 查看 hdfs 数据
+    cat examples/src/main/python/ml/kmeans_example.py 查看代码
+    
+    ./bin/spark-submit examples/src/main/python/ml/kmeans_example.py
+standalone 集群运行 kmeans:
+    ./bin/spark-submit --master spark://master:7077 examples/src/main/python/ml/kmeans_example.py
+    1. 出错 Initial job has not accepted any resources; check your cluster UI to ensure that workers are registered and have sufficient resources
+        不知道怎么解决
+    
+yarn 集群运行 kmeans:
+    
+    ./bin/spark-submit --master yarn examples/src/main/python/ml/kmeans_example.py
+    1. 出错 Exception in thread "main" org.apache.spark.SparkException: When running with master 'yarn' either HADOOP_CONF_DIR or YARN_CONF_DIR must be set in the environment.
+        添加
+        export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+        export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop
+    
+
+
+
+

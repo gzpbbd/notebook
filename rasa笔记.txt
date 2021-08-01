@@ -1,3 +1,19 @@
+Python包的版本：
+    python 3.7.10
+    tensorflow 2.3.2
+    rasa 2.6.3
+    rasa-x 0.40.1
+
+命令 https://rasa.com/docs/rasa/command-line-interface ：
+    rasa run 启动 rasa 服务器
+    rasa run actions 启动action server
+    rasa x 启动 rasa-x
+    rasa init 初始化一个情绪机器人项目
+    rasa train 训练NLU与PL
+    rasa shell 命令行模式与 rasa 交互
+
+
+
 NLU data: 定义意图，并提供一些意图样本
 response: 定义回应。提供回应的文本，如果一个response有多个可选的text选项，则会随机选一个text选项。
 stories: 定义问答流程。会考虑用户之前说过的话。
@@ -20,8 +36,6 @@ NLU 负责理解用户说的话。
 rasa core（对话管理器）负责根据stories与语境，决定机器人的回应。
 rasa X 提供了便利的工具，用于收集现实的对话，分析对话，迭代对话机器人
 
-命令：
-    rasa init 初始化一个情绪机器人项目
 
 rasa 的训练数据的顶级关键字：
     version
@@ -32,42 +46,261 @@ rasa 的训练数据的顶级关键字：
 ---
 
 
+pipeline components:
+    注：Mitie、Jieba、spacy都是NLP工具包。其中spacy的github支持人数多，更新频繁，其它两个已经很少更新了。
+    语言模型：
+        MitieNLP: 初始化MITIE结构。如果要使用任何Mitie组件，需要将MitieNLP放在pipeline的第一个位置。需要安装mitie
+        SpacyNLP：初始化Spacy结构。如果要使用任何spacy组件，需要将SpacyNLP放在pipeline的第一个位置。需要安装spacy
+    分词器（tokenizer）：用于给 meggages, responses, intents 分词
+        WhitespaceTokenizer：使用空格作为分隔符
+        JiebaTokenizer: Jieba中文分词器。可以自定义词典
+        MitieTokenizer：使用 MITIE 分词
+        SpacyTokenizer：使用了 spacy 包
+        
+    特征化（featurizer）：
+        注：
+            featurizer 有两类：sparse featurizer，dense featurizer。区别在于返回的特征向量是不是包含非零值
+            featurizer 对每个句子返回的特征形状有两种：(number-of-tokens x feature-dimension)、(1 x feature-dimension)。因此对应的分类器是不一样的。
+            
+        MitieFeaturizer：Dense featurizer
+        SpacyFeaturizer：dense_features 
+        ConveRTFeaturizer：使用了 ConveRT 模型。只能用于英语。且 ConveRT 模型在GitHub已经自己下架了
+        LanguageModelFeaturizer：使用语言模型生成句子特征，需要指定语言模型
+        RegexFeaturizer：使用定义的正则表达式生成特征，指明表达式模式是否在句子中找到
+        CountVectorsFeaturizer：创建 bag-of-words 特征。analyzer表明是对于word还是character的 bag-of-words
+        LexicalSyntacticFeaturizer：创建 lexical and syntactic features
+    意图分类器（intent classifier）：
+        注：默认会使用之前所有featurizer的输出特征。可以通过关键字设置使用哪些featurizers的输出特征，如下
+            - name: ConveRTFeaturizer
+                alias: "convert"
+            - name: RegexFeaturizer
+                alias: "regex"
+            - name: LexicalSyntacticFeaturizer
+                alias: "lexical-syntactic"
+            - name: CountVectorsFeaturizer
+                alias: "cvf-word"
+            - name: DIETClassifier
+                featurizers: ["convert", "cvf-word"]
+        
+        
+        MitieIntentClassifier：使用了 mitie 包。底层是 SVM 分类器
+        SklearnIntentClassifier：使用了 sklearn 包。底层是 SVM 分类器。
+        KeywordIntentClassifier：使用提供的整个example作为关键词，搜索句子中是否出现关键词。
+        DIETClassifier：DIET (Dual Intent and Entity Transformer)。多任务模型（意图识别+实体识别）。是 rasa 团队自己提出的一个基于transformer的模型。
+        FallbackClassifier：如果前一个意图分类器的意图分数不达标，则添加 nlu_fallback 意图。
+    命名实体识别（Entity Extractors）：
+        MitieEntityExtractor
+        SpacyEntityExtractor
+        CRFEntityExtractor
+        DucklingEntityExtractor：提取日期、月份、距离等实体。通过向Duckling服务器发送http请求。
+        RegexEntityExtractor
+        EntitySynonymMapper：映射同义实体。
+    Selectors：与 retrieval intent 有关
+        ResponseSelector
+
+   
+修改文件：
+    添加 intent：
+        data/nlu.yml
+        domain.yml
+    添加 entity:
+        data/nlu.yml
+        domain.yml （entities）
+    添加 response:
+        domain.yml （responses）
+    添加 form: 
+        domain.yml (forms, slots, entities)
+    添加 rule/story:
+        data/stories.yml
+        data/rules.yml
+    添加 action:
+        actions/xxx.py
+        domain.yml (actions)
+        endpoints.yml
+        
+
+form:
+    定义 form: https://rasa.com/docs/rasa/forms#defining-a-form
+    把 form 写入 rules.yml/stories.yml: https://rasa.com/docs/rasa/training-data-format#forms
+    询问 slot 时按如下顺序查找 response 与 action: 
+        utter_ask_<form_name>_<slot_name> 
+        utter_ask_<slot_name>
+        action_ask_<form_name>_<slot_name> 
+        action_ask_<slot_name>
+    注意添加 slot 与 entity，否则会出错
+
+rasa x:
+    运行 rasa x
+    在 rasa x 的 web 页码修改数据后，需要间隔一小段时间才会同步到服务器（大概是几十秒）
 
 
 
+rasa 对话：
+    每一个Conversation 在都有一个 ID，如果使用同一个 ID 发送，则会归为同一个对话。
 
+custom action:
+    需要在 endpoints.yml 写入：
+        action_endpoint:
+            url: "http://localhost:5055/webhook"
+    custom_action 接收到的是tracker等信息，返回的是一个event列表
+        tracker: 记录conversation的信息。包含了当前的slots和之前的events
+        events: rasa将conversation表示为一系列的event。一些典型event如下：
+            user: user发送一个message给bot
+            slot: 设置单个slot
+            bot: bot发送一个message给user
+            action: policies判断出bot应执行的action
+            session_started: 开始一个新的session
+            rewind: 从tracker中删除最近一条用户消息和该消息的所有影响
 
+    custom_action.run的参数：
+        tracker： 包含了conversation的信息
+        dispatcher: 用于给user发message。method为dispatcher.utter_message(...)
 
-编写故事可能需要改动的文件
-    story, rule(stories.yml, rules.yml)
-        intent (nlu.yml, domain.yml)
-        response (domain.yml)
-        action (actions.py, domain.yml, endpoints.yml)
+policy:
+    rasa训练policy时选择的特征为：
+        用户输入的意图
+        用户输入的实体
+        上一个系统action或bot的utterance
+        slots
+        active form
+        
+    policy预测actions应该是对于每个用户的message，预测多个actions，直到action为action_listen为止
 
-custom_action 接收到的是tracker等信息，返回的是一个event列表
-    tracker: 记录conversation的信息。包含了当前的slots和之前的events
-    events: rasa将conversation表示为一系列的event。一些典型event如下：
-        user: user发送一个message给bot
-        slot: 设置单个slot
-        bot: bot发送一个message给user
-        action: policies判断出bot应执行的action
-        session_started: 开始一个新的session
-        rewind: 从tracker中删除最近一条用户消息和该消息的所有影响
-
-custom_action.run的参数：
-    tracker： 包含了conversation的信息
-    dispatcher: 用于给user发message。method为dispatcher.utter_message(...)
-
-rasa训练policy时选择的特征为：
-    用户输入的意图
-    用户输入的实体
-    上一个系统action或bot的utterance
-    slots
-    active form
-policy预测actions应该是对于每个用户的message，预测多个actions，直到action为action_listen为止
-
-rasa的一些默认action:
+rasa的一些默认 action:
+    /restart 重启对话
     action_default_fallback: 撤销最近的一轮 user-bot 交互。具体操作是生成一个 rewind 事件。
 
-测试：
-    一句话中两个同名实体：都会识别出来。
+    
+entity:
+    在指定 NLU 语料中标注，不区分type。
+    
+slot:
+    类型（如何影响对话）：
+        text：是否为空
+        bool：是否为空，ture还是false
+        categorical：哪一类
+        float：值是什么
+        list：是否为空
+        any：始终不影响对话
+        自定义类型
+    slot可以设置初始值：initial_value 属性
+    slot的填充有两种方式：
+        1. 通过 slot auto-fill:
+            NLU检测到了同名实体，自动填充
+        2. 通过action或者form
+            action: 手动设置slot的值
+            form: 根据用户的话语设置slot的值，提供了一些规则
+                from_entity：从指定的entity_name映射到slot
+                from_text: 使用下一条user utterance 填充
+                from_intent： 如果下一条user intent满足特定条件，就给slot填充一个指定值
+                from_trigger_intent：如果form是被特定的user intent激活，就使用特定的值填充slot
+         
+结构图： https://rasa.com/docs/rasa-x/api/architecture
+    rasa 结构： https://rasa.com/docs/rasa-x/api/architecture#rasa-x-services
+        NLU: 解析用户话语的意图与实体 
+        dialogue policies: 基于对话状态，在收到用户话语后，决定机器人之后的动作
+        tracker store：保存conversation。conversation由一系列event组成。
+        envent brokers: 向消息流服务（也称为消息代理）发布消息，以将 Rasa event从 Rasa 服务器转发到其他服务。即将储存到tracker store的event，同时发送出去。可以用于连接机器人到其他服务上。
+        lock stores: rasa 使用了一个 lock 机制，用于确保对于给定的 conversation ID，消息是按照正确的顺序处理的。
+        
+下列这些文件都是rasa x 产生的，保存了历史 conversation，git 等信息：
+    events.db
+    events.db-shm
+    events.db-wal
+    rasa.db
+        
+HTTP API:
+    rasa server:
+        启动 HTTP API: 
+            rasa run --enable-api 或者
+            rasa x --enable-api
+        HTTP 地址 ip:5002
+        可用的 api https://rasa.com/docs/rasa/pages/http-api#tag/Tracker
+    rasa x server:
+        启动 HTTP API: 
+            rasa x --enable-api
+        HTTP 地址 ip:5005
+        rasa x 的 web 界面用的就是这些 HTTP API
+rasa x enterprise：
+    只能通过 k8s 或者 docker 安装。
+    独有的功能：
+        single sign-on
+        role-based access control
+        deployment environments
+        
+             
+rasa 支持中文   
+    下载 spacy:
+        pip3 install rasa[spacy]
+        python3 -m spacy download en_core_web_md
+        
+    config.yml 使用 SpacyNLP、SpacyTokenizer、SpacyFeaturizer
+    
+rasa nlu API:
+    1. rasa run --enable-api -m models/nlu-20190515-144445.tar.gz
+    2. 向 http://<host>:<port>/model/parse 发送 post 请求，请求的body内写 {"text":"hello"}
+    
+rasa server的 http 接口： https://rasa.com/docs/rasa/connectors/your-own-website#rest-channels
+    1. credentials.yml 写入 ：
+        rest:            
+    2. rasa run 运行 rasa server (ip:5005)
+    3. 向 http://<host>:<port>/webhooks/rest/webhook 发送 POST 请求，请求的 body 部分为
+        {
+          "sender": "test_user",
+          "message": "Hi there!"
+        }
+    4. 可用的 HTTP API
+        https://rasa.com/docs/rasa/pages/http-api
+    
+rasa 直接上传 slot 信息： https://rasa.com/docs/rasa/pages/http-api#operation/addConversationTrackerEvents
+    1. 向 http://localhost:5005/conversations/{conversation_id}/tracker/events 发送 post 请求，请求的 body 为
+    [
+        {
+            "event": "slot",
+            "name": "time",
+            "value": "3"
+        }
+    ]
+    注意：
+        1. rasa 重启后，不会记忆历史 conversation，所以历史conversation ID 在 rasa 中会失效
+        2. timestamp 不填，或者填0，都可以
+    
+rasa x 的http接口：
+    1. 运行 rasa x 命令后，后台会运行 rasa server （ip:5002）
+    2. 之后向 http://<host>:<port>/webhooks/rest/webhook 发送 POST 请求，请求的 body 部分为
+        {
+          "sender": "test_user",
+          "message": "Hi there!"
+        }
+    3. 可以在 rasa x web 界面的 conversations 界面看见对话内容。使用 sender 区分不同对话
+    4. 可用的 HTTP API
+        https://rasa.com/docs/rasa-x/pages/http-api
+        bearerAuth https://rasa.com/docs/rasa-x/pages/http-api#operation/login
+        查询conversation列表 https://rasa.com/docs/rasa-x/pages/http-api#operation/getConversations
+        
+   
+如何主动结束一段会话   
+    无法结束对话。只要对话 ID 是一样，那么就会归为一通对话中
+    
+查看 rasa x 部署的其他方法
+    rasa x 部署：
+        local mode: 本地安装。最简单，不使用 k8s 或者 docker 容器。之后运维也简单
+        quick-installation: 使用了自动化脚本安装 k8s，本质是使用了 helm chart 安装
+        helm chart: 安装在 k8s 上面
+        docker compose: 安装在docker容器里。麻烦
+        
+rasa x 配置：
+    密码：export RASA_X_PASSWORD="my-secure-password"
+    rasa x 运行命令是带有一些可以设置的参数，比如 server port
+    
+rasa x 的多个用户同时访问。
+    rasa x 分享测试链接后，不同浏览器开启的对话，会被分配不同的 conversation ID。或者用浏览器的隐身模式打开，也会发分配到不同 conversation ID。
+    rasa 使用 conversation ID 区分不同对话
+   
+   
+   
+   
+rasa 增加自定义NLU算法
+    
+rasa 自定义PL算法
+

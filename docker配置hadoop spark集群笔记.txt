@@ -1,0 +1,121 @@
+#设置环境变量
+# ~/.bashrc中添加
+# JAVA
+export JAVA_HOME=/usr/local/java/jdk1.8.0_251
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$JAVA_HOME/bin:$PATH:$JRE_HOME/bin
+
+# hadoop
+export HADOOP_HOME=/usr/local/hadoop/hadoop-2.10.1
+export HADOOP_CONFIG_HOME=$HADOOP_HOME/etc/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin
+
+export PATH=$PATH:$HADOOP_HOME/sbin
+export SPARK_DIST_CLASSPATH=$(hadoop classpath)
+
+
+--------- 修改core-site.xml
+
+<configuration>
+    <property>
+            <name>hadoop.tmp.dir</name>
+            <value>/usr/local/hadoop/hadoop-2.10.1/tmp</value>
+            <description>A base for other temporary directories.</description>
+    </property>
+
+    <property>
+            <name>fs.default.name</name>
+            <value>hdfs://master:9000</value>
+            <final>true</final>
+            <description>The name of the default file system. 
+            A URI whose scheme and authority determine the 
+            FileSystem implementation. The uri's scheme 
+            determines the config property (fs.SCHEME.impl) 
+            naming the FileSystem implementation class. The 
+            uri's authority is used to determine the host,
+            port, etc. for a filesystem.        
+            </description>
+    </property>
+</configuration>
+
+------------- 配置hdfs-site.xml
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>2</value>
+        <final>true</final>
+        <description>Default block replication.
+        The actual number of replications can be specified when the file is created.
+        The default is used if replication is not specified in create time.
+        </description>
+    </property>
+
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/usr/local/hadoop/hadoop-2.10.1/namenode</value>
+        <final>true</final>
+    </property>
+
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/usr/local/hadoop/hadoop-2.10.1/datanode</value>
+        <final>true</final>
+    </property>
+</configuration>
+
+
+------------- 配置mapred-site.xml
+<configuration>
+    <property>
+        <name>mapred.job.tracker</name>
+        <value>master:9001</value>
+        <description>The host and port that the MapReduce job tracker runs
+        at.  If "local", then jobs are run in-process as a single map
+        and reduce task.
+        </description>
+    </property>
+</configuration>
+
+------------- 配置yarn-site.xml
+<configuration>
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+        <description>Whether virtual memory limits will be enforced for containers</description>
+    </property>
+</configuration>
+
+
+--------- ~/spark.env.sh中添加
+export JAVA_HOME=/usr/local/java/jdk1.8.0_251
+export HADOOP_HOME=/usr/local/hadoop/hadoop-2.10.1
+export HADOOP_CONFIG_DIR=$HADOOP_HOME/etc/hadoop
+export SPARK_DIST_CLASSPATH=$(hadoop classpath)
+SPARK_MASTER_IP=master
+SPARK_LOCAL_DIR=/usr/local/spark/spark-2.4.8-bin-without-hadoop
+SPACK_DRIVER_MEMORY=8G
+
+---------- ~/slaves中添加
+slave01
+slave02
+
+创建新镜像
+docker commit -m "centos7 with java 1.8.0_251 spark 2.4.8 hadoop 2.10.1" test centos7:with-spark-hadoop 
+开启master
+docker run -itd -P -p 50070:50070 -p 8088:8088 -p 8080:8080 --privileged --name master -h master --add-host slave01:172.17.0.7 --add-host slave02:172.17.0.8 centos7:with-spark-hadoop /usr/sbin/init
+开启slaves
+docker run -itd -P --privileged --name slave01 -h slave01 --add-host master:172.17.0.6 --add-host slave02:172.17.0.8 centos7:with-spark-hadoop /usr/sbin/init
+docker run -itd -P --privileged --name slave02 -h slave02 --add-host master:172.17.0.6 --add-host slave01:172.17.0.7 centos7:with-spark-hadoop /usr/sbin/init
+
+原来 slave2:
+172.17.0.6      master
+172.17.0.8      slave02
+172.17.0.4      slave01
+
+改为： 
+
+172.17.0.3      master
+172.17.0.4      slave01
+172.17.0.5      slave02
+
+export PYTHONPATH=${SPARK_HOME}/python:${SPARK_HOME}/python/pyspark.zip:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip:$PYTHONPATH

@@ -1,0 +1,96 @@
+docker 概念：
+	image 不同应用的文件
+	container 运行image的实体
+	可用一个 image 启动多个 container
+
+docker 命令:
+    docker version
+    docker info
+    
+下载image:    
+    docker pull image_name 下载image
+    docker search image_name 搜索image
+    
+运行docker容器：    
+    docker run -it image_name command_name 交互式运行容器，执行命令
+    docker run -d image_name 后台运行容器。容器使用后台运行，就必须要有一个前台进程。docker发现没有应用，就会自动停止
+    
+    docker run  --privileged --name test  -h test --add-host spark:172.17.0.2 -itd centos:centos7 /bin/bash  
+	docker run 的参数
+		-i, --interactive=false， 打开STDIN，用于控制台交互
+		-t, --tty=false， 分配tty设备，该可以支持终端登录，默认为false
+		-d, --detach=false， 指定容器运行于前台还是后台，默认为false
+		--restart="no"， 指定容器停止后的重启策略:
+					no：容器退出时不重启
+					on-failure：容器故障退出（返回值非零）时重启
+					always：容器退出时总是重启		
+		--name=""， 指定容器名字，后续可以通过名字进行容器管理，links特性需要使用名字
+		--net="bridge"， 容器网络设置:
+					bridge 使用docker daemon指定的网桥
+					host //容器使用主机的网络		
+		-v, --volume=[本地路径：容器路径]， 给容器挂载存储卷，挂载到容器的某个目录。
+        
+		-p, --publish=[本地端口：容器端口]， 指定容器暴露的端口
+        
+        --privileged  赋予容器中 root 所有权限。默认情况下 container 中的 root 有一些权限是没有的。
+        
+        -h, --hostname string                Container host name
+        --add-host list                  Add a custom host-to-IP mapping (host:ip)
+        --ip string                      IPv4 address (e.g., 172.30.100.104)
+	
+进入docker 容器:
+    docker exec -it container_id /bin/bash  
+    docker attach container_id 生产环境不推荐
+退出容器：
+    exit
+    
+从容器创建新的image:
+    docker commit -m "centos7 with java 1.8.0_251 spark 2.4.8 hadoop 2.10.1" test centos7:with-spark-hadoop  容器名为 test, 仓库名 centos7，标签 with-spark-hadoop
+    
+查看信息：        
+	docker images -a 查看本地有哪些image
+    
+	docker ps 显示当前运行的容器
+    docker ps -a 显示所有容器
+    docker ps -aq 显示所有容器的ID
+	docker container ls 查看容器状态
+    
+    docker inspect -f='{{.Name}} {{.NetworkSettings.IPAddress}} {{.HostConfig.PortBindings}}' $(docker ps -aq) 查看所有容器的 ip、端口映射
+    
+删除image：    
+	docker rmi image_id 删除image
+    docker rmi -f image_id 强制删除image
+
+删除container:    
+	docker rm container_id 删除容器
+    docker rm -f container_id 强制删除容器
+    docker rm -f $(docker ps -aq) 强制删除所有容器
+    
+启动容器：    
+	docker start container_id 启动容器
+    docker restart container_id 重启容器
+    
+    docker stop container_id 停止容器
+    docker kill container_id 杀掉容器
+    
+	docker logs container_id 查看日志
+    docker logs -t container_id 查看日志，带时间戳
+    
+	docker top container_id 查看容器的进程
+    docker inspect container_id 查看容器信息
+    docker exec -it container_id /bin/bash 进入容器，开启新的终端
+    docker attach container_id 进入容器，进入正在执行的终端，不会启动新的进程
+    docker cp container_id:resource_path destination_path 将容器内文件拷贝到本地文件系统中
+    docker cp destination_path container_id:resource_path 将本地文件系统内文件拷贝到容器中
+    docker run -d --name nginx01 -p 3344:80 nginx 后台运行nginx
+        -d 后台运行
+        --name 给容器取名
+        -p 暴露端口 local_system:container
+    docker stats 查看运行的容器状态
+
+基于container 构建新 image:    
+	docker commit -m comments container_id repository_name:version.minor
+    
+启动 docker container 中的的 ssh 服务：
+    /usr/sbin/sshd -D &
+    

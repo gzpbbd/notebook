@@ -1,0 +1,85 @@
+版本对应：    
+    spark 2.4.8
+    java 8
+    hadoop 2.10.1 (2.7+)
+
+配置：
+    ~/.bashrc中:
+        export SPARK_HOME=/usr/local/spark/spark-2.4.8-bin-without-hadoop
+        export PATH=$SPARK_HOME/bin:$PATH
+    spark的主目录中  ./conf/spark-env.sh:
+        export SPARK_DIST_CLASSPATH=$(hadoop classpath)
+    
+    运行 spark-shell 查看是否安装成功
+
+web 服务：
+    host:8080 spark页面
+    
+单机模式：
+    local
+集群模式： 区别在于集群管理的工具不同   
+    standalone
+    YARN
+    Mesos
+    
+课程假设使用：
+    hadoop 伪分布式。多节点在同一条机器。 安装教程 http://dblab.xmu.edu.cn/blog/install-hadoop-in-centos/
+    spark 单机模式 
+
+运行pyspark，进入spark的家目录：
+    pyshark --master local[K|*]
+    
+命令：
+    启动：
+        启动hadoop:
+            ./sbin/start-all.sh
+        启动spark:
+            ./sbin/start-master.sh
+            ./sbin/start-slaves.sh
+            或 ./sbin/start-all.sh
+    停止：
+        停止spark:
+            ./sbin/stop-master.sh
+            ./sbin/stop-slaves.sh
+            或 ./sbin/stop-all.sh
+        停止hadoop:
+            ./sbin/stop-all.sh
+            
+交互式运行：
+    pyspark --master spark://master:7077
+            
+python程序：            
+file = sc.textFile("hdfs://hadoop101:9870/README.md")
+
+#(测试时候发现，本地文件必须在spark的安装路径内部或者平行)
+hdfs://master:9000/iris.txt
+file = sc.textFile("hdfs://master:9000/iris.txt") 
+file = sc.textFile("file:///usr/local/spark/spark-2.4.8-bin-without-hadoop/README.md") 
+file = sc.textFile("file:///usr/local/spark/spark-2.4.8-bin-without-hadoop/iris.txt") 
+file.count()        
+        
+
+集群运行程序：
+    ./bin/spark-submit --master spark://master:7077 ./examples/src/main/python/pi.py
+    
+    ./bin/spark-submit examples/src/main/python/ml/kmeans_example.py
+    
+单机运行 kmeans:
+    cd /usr/local/spark/spark-2.4.8-bin-without-hadoop/ 
+    hdfs dfs -cat /user/root/data/mllib/sample_kmeans_data.txt 查看 hdfs 数据
+    cat examples/src/main/python/ml/kmeans_example.py 查看代码
+    
+    ./bin/spark-submit examples/src/main/python/ml/kmeans_example.py
+standalone 集群运行 kmeans:
+    ./bin/spark-submit --master spark://master:7077 examples/src/main/python/ml/kmeans_example.py
+    1. 出错 Initial job has not accepted any resources; check your cluster UI to ensure that workers are registered and have sufficient resources
+        不知道怎么解决
+    
+yarn 集群运行 kmeans:
+    
+    ./bin/spark-submit --master yarn examples/src/main/python/ml/kmeans_example.py
+    1. 出错 Exception in thread "main" org.apache.spark.SparkException: When running with master 'yarn' either HADOOP_CONF_DIR or YARN_CONF_DIR must be set in the environment.
+        添加
+        export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+        export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop    
+    

@@ -17,25 +17,45 @@ Hadoop 3.1.3 - Jdk 8
 概念：
     common 辅助工具
     HDFS 数据存储（ DataNode / NameNode / SecondaryNameNode）
+        DataNode: 数据节点。每个节点一个
+        NameNode: 存储文件的元数据，如文件名，文件目录结构，文件属性，以及每个文件的块列表和块所在的DataNode等。
+        SecondaryNameNode: 备用的NameNode
     Yarn 资源调度（NodeManager / ResourceManager）
+        ResourceManager: 管理整个hadoop。只有一个
+        NodeManager: 管理单个节点。每个节点一个
+        WebAppProxy
     MapReduce 计算
-
-    ResourceManager: 管理整个hadoop。只有一个
-    NodeManager: 管理单个节点。每个节点一个
-    DataNode: 数据节点。每个节点一个
-    NameNode: 存储文件的元数据，如文件名，文件目录结构，文件属性，以及每个文件的块列表和块所在的DataNode等。
-    SecondaryNameNode: 备用的NameNode
+        History Server 
     
     Container 运行任务的容器
     
-
+hadoop 配置文件路径：
+    只使用 HDFS 时：
+        HADOOP_HOME/etc/hadoop/core-site.xml
+        HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    若要使用 MapReduce 和 YARN，还需配置
+        HADOOP_HOME/etc/hadoop/mapred-site.xml
+        HADOOP_HOME/etc/hadoop/yarn-site.xml
+    
+    单主机时只需要配置：
+        HADOOP_HOME/etc/hadoop/core-site.xml
+        HADOOP_HOME/etc/hadoop/hdfs-site.xml
+        
+    配置集群有哪些节点：
+        /etc/hadoop/workers (hadoop 3.x.x )
+        /etc/hadoop/slave (hadoop 3.x.x )
+        
+web 服务：
+    host:50070 hdfs 页面
+    host:8088 yarn 页面
+    
 
 hadoop 三个节点安排：
     hadoop101: 192.168.153.101, DataNode, NodeManager, NameNode
     hadoop102: 192.168.153.102, DataNode, NodeManager, ResourceManager
     hadoop103: 192.168.153.103, DataNode, NodeManager, SecondaryNameNode
     
-    NameNode、SecondaryNameNode、ResourceManager 都比较好内存，尽量安装在不同节点上
+    NameNode、SecondaryNameNode、ResourceManager 都比较耗内存，尽量安装在不同节点上
     
     historyserver 也在 101 上
     
@@ -43,22 +63,37 @@ hadoop 三个节点安排：
     http://hadoop102:8088/ ResourceManager
     http://hadoop101:19888/ JobHistory
     
+    fs.defaultFS hdfs://hadoop101:8020
+    
 
-hadoop 配置：
-    HADOOP_HOME/etc/hadoop/core-site.xml
-    HADOOP_HOME/etc/hadoop/hdfs-site.xml
-    HADOOP_HOME/etc/hadoop/yarn-site.xml
-    HADOOP_HOME/etc/hadoop/mapred-site.xml
+
     
 命令：
+    hadoop namenode -format 格式化
+    
     hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.1.3.jar wordcount /wcinput /wcoutput 运行示例代码。输出目录必须不存在
     jps JAVA提供的工具。查看Java进程。显示其PID与程序名。 -m 显示传递的参数。 -l 显示class的完整包名
     start-dfs.sh 启动 hdfs。可在任意节点运行
-    start-yarn.sh 启动 yarn。可在任意节点运行
+    start-yarn.sh 启动 yarn。需要在 resourceManager 节点启动
     stop-all.sh 停止hadoop。可在任意节点运行
     mapred --daemon start historyserver 启动历史服务器。必须在历史服务器上运行
     
+hdfs 命令：
+    hdfs dfsadmin -report 查看当前各节点状态
+    
+    hdfs dfs -ls / 查看文件
+    hdfs dfs -rm /aa.txt
+    hdfs dfs -mv /hdfs路径 /hdfs路径
+    hdfs dfs -cp /hdfs路径 /hdfs路径
+    hdfs dfs -mkdir -p /a/b/c/d 创建多级目录
+    
+    
+    hdfs dfs -put /本地路径 /hdfs路径 上传
+    hdfs dfs -get /hdfs路径 /本地路径 下载
+    
 报错:
     container is running beyond virtual memory limits. https://blog.csdn.net/qq_33202508/article/details/108850153
-    如果hadoop崩溃了，可以删掉所有节点的data、logs目录。然后格式化hdfs，一切重来。
+    如果hadoop崩溃了，可以删掉所有节点的 data、logs目录。然后格式化hdfs，一切重来。
+        data 目录是 core-site.xml 中配置的 hadoop.tmp.dir 目录
     
+Hadoop中的Master就是NameNode所在的主机，可以在 HADOOP_HOME/etc/hadoop/core-site.xml 中查看

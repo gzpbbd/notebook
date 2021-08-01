@@ -1,3 +1,8 @@
+涉及到 GPU 时，pytorch默认使用 0 号 gpu
+可以使用下面 python 代码指定 pytorch 可用的 GPU:
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2" # 第 2 号 GPU 可见
+
 类 torch.Tensor:
     is_cuda()
     grad()
@@ -55,6 +60,8 @@ torch.nn.Linear(in_features: int, out_features: int)
 损失：
     torch.nn.CrossEntropyLoss()  This criterion combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
         所以网络的最后一层不需要添加激活函数
+    torch.nn.NLLLoss() The negative log likelihood loss.
+        nn.LogSoftmax() 先计算 softmax,再计算 log
 
 优化器 torch.optim.SGD(params, lr=<required parameter>):
     step()

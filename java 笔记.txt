@@ -1,0 +1,34 @@
+java 中只有值传递。
+java 中类对象保存的是对象的地址，不是实例本身。所以类对象的传递相当于c++中的引用传递。
+
+不过 java 中基本类型保存的是值，引用类型保存的是对象的地址。
+
+
+java数据类型可以分为两大类：基本类型（primitive types）和引用类型（reference types）。primitive types 包括boolean类型以及数值类型（numeric types）。numeric types又分为整型（integer types）和浮点型（floating-point type）。整型有5种：byte short int long char(char本质上是一种特殊的int)。浮点类型有float和double。
+class都是引用类型。保存的是具体对象的地址。所以
+    public static void changeValue(Test t) {
+        t = new Test(2); // 会修改 t 指向的地址
+
+    }
+
+    public static void changeInner(Test t) {
+        t.setN(3); // 不会修改 t 指向的地址，直接修改 t 指向地址中的属性的值。
+    }
+
+    class Test {
+        public int n;
+
+        public Test(int a) {
+            n = a;
+
+        }
+
+        public void setN(int a) {
+            n = a;
+        }
+
+    }
+    
+构造函数与析构函数：
+    构造函数为与类名同名的函数，无返回值
+    析构函数为finalize，默认会释放内存

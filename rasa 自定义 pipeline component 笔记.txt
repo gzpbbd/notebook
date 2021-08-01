@@ -1,0 +1,65 @@
+Python包的版本：
+    python 3.7.10
+    tensorflow 2.3.2
+    rasa 2.6.3
+    rasa-x 0.40.1
+
+        
+定义 pipeline components: https://rasa.com/docs/rasa/components#custom-components
+    需要实现下列方法：
+    __init__:
+        component_config: 字典
+        
+    train： 基于 TrainingData 训练模型，不用负责保存模型
+        training_data：TrainingData。
+        config：RasaNLUModelConfig。
+        
+    process： 输入为 Message，输出必要的数据。Message 是自定义一种 rasa 定义的类。
+        message：Message。
+    
+    persist： 保存训练好的模型
+        file_name：str, 比如 component_1_MyComponent
+        model_dir: str, 比如 /tmp/tmp9ebqcv97/nlu
+    
+    load： 加载之前保存的模型
+        meta：字典。
+        model_dir: str, 比如 /tmp/tmp9ebqcv97/nlu
+        model_metadata：Metadata。
+        cached_component：Component。
+    
+    注：可以参考 keyword_intent_classifier.py
+        Component Lifecycle: https://rasa.com/docs/rasa/tuning-your-model#component-lifecycle
+https://rasa.com/docs/rasa/tuning-your-model#component-lifecycle        
+
+    查看 tokenizer featurer classify 的输入输出
+    
+    在 rasa train nlu 过程中：
+        依次经过下列步骤：
+            __init__
+            train
+            persist
+    在 rasa shell nlu 过程中：
+        依次经过下列步骤：
+            load
+            __init__
+            process
+    
+    
+把 pipeline 中每个 component 的输入输出数据都保存下来    
+    
+    
+    -------------------------------------------
+    
+def train(
+    self,
+    training_data: TrainingData,
+    config: Optional[RasaNLUModelConfig] = None,
+    **kwargs: Any,
+) -> None:
+
+    TrainingData.training_examples: Optional[List[Message]] = None,
+
+def process(self, message: Message, **kwargs: Any) -> None:
+    Message.data: Optional[Dict[Text, Any]] = None,
+    Message.output_properties: Optional[Set] = None,
+    Message.features: Optional[List["Features"]] = None,    

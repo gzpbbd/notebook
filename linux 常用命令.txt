@@ -27,6 +27,7 @@
     ubuntu 查看当前网络流量状态：
         sudo apt install nethogs 安装nethogs
         sudo nethogs enp0s31f6 查看指定网卡的状态
+    pstree [PID或者用户名] -ap 查看指定PID或者用户的进程树
 
 	
 
@@ -47,6 +48,7 @@
 	scp -r [[user@]host1:]file_source  [[user@]host2:]file_target  服务器间的文件拷贝
 	rsync -av SRC [USER@]HOST::DEST 服务器间的文件同步
 	rsync -av [USER@]HOST::SRC DEST 
+    ln -s file link_name 创建软链接
 
 
 运行、安装、配置：
@@ -85,14 +87,16 @@
 	netstat -ap | grep port_num 查看使用指定端口的进程
 
     linux 设置代理服务器
-		export https_proxy="10.12.42.156:7890"
-		export http_proxy="10.12.42.156:7890"
+		export https_proxy="http://127.0.0.1:7890"
+		export http_proxy="http://127.0.0.1:7890"
         
 		export https_proxy="edu.kuretru.com:33080"
 		export http_proxy="edu.kuretru.com:33080"
         
 
 		export socks_proxy="10.12.42.156:7890"
+        
+        set http_proxy=http://127.0.0.1:7890 & set https_proxy=http://127.0.0.1:7890
 		
 	修改网络IP为静态IP：修改/etc/sysconfig/network-scripts/ifcfg-ens33 中的BOOTPROTO="static"，末尾加上IPADDR=X.X.X.X,GATEWAY=X.X.X.X,DNS1=X.X.X.X
 	
@@ -141,10 +145,31 @@
 	
 	gpustat -cpu 查看哪些在用gpu
 	ls -al /proc/32433/exe 找到pid 32433 对应的运行程序
+    
+    htop -u user_name 查看用户运行的进程
+    cat /proc/process_PID/cmdline 查看指定进程的命令行参数
 	
 VMWare:
 	虚拟机位置 E:\Users\huangchenping\Documents\Virtual Machines\
 	复制虚拟机：复制 vmx 与 vmdk 为后缀的文件
+
+screen 命令 https://linux.die.net/man/1/screen ：
+    screen -ls [session] 列出所有SockDir
+    screen -S sessionName 创建一个名为 sessionName 的 session
+    screen -dr sessionName 回到指定的session
+    screen -x sessionName 回到指定的session，共享屏幕
+    screen -dr sessionName -X quit 彻底关闭指定的session
+    
+    screen中的键绑定：
+        ctrl+a d 脱离当前的session
+        ctrl+a k 彻底关闭(kill)当前的session。
+        
+    一个session可以包含多个window
+    screen的配置文件 ~/.screenrc:
+        # 设置窗口标题
+        caption always "%n %t %= %H %u %Y/%m/%d %c"
+    
+    
 
 conda
     conda create -n your_env_name python=X.X（2.7、3.6等)
@@ -164,12 +189,16 @@ conda
 	conda config --remove channels  https://mirrors.aliyun.com/pypi/simple/
 	
 
-    修改pip源
+    修改pip源：
+        pip -v config list 可以查看有配置文件路径
+        1. 配置文件有两处，按照优先级从高到低：
+            ~/.config/pip/pip.conf
+            ~/.pip/pip.conf
         在用户或者根目录下创建 .pip/pip.conf 文件，写入
-        [global]
-        index-url = http://mirrors.aliyun.com/pypi/simple/
-        [install]
-        trusted-host=mirrors.aliyun.com
+[global]
+index-url = https://mirrors.aliyun.com/pypi/simple/
+[install]
+trusted-host=mirrors.aliyun.com
 
 安装jupyter核有两种办法：
     1：使用 nb_conda
@@ -178,7 +207,7 @@ conda
         https://blog.csdn.net/u012428169/article/details/103046857
 
         jupyter 命令:
-            pip install ipykernel
+            conda install ipykernel
             jupyter kernelspec list
             python -m ipykernel install --user --name 环境名
             jupyter kernelspec remove envname
@@ -202,66 +231,3 @@ pycharm连接服务器：
     2.部署sftp映射，同步文件
     3.在 run -> config 中对对应的python文件添加环境变量
         ;LD_LIBRARY_PATH=/usr/local/cuda/lib64;
-
-
-docker 概念：
-	image 不同应用的文件
-	container 运行image的实体
-	可用一个 image 启动多个 container
-
-docker 命令:
-    docker version
-    docker info
-    docker pull image_name 下载image
-    docker search image_name 搜索image
-    docker run -it image_name command_name 交互式运行容器，执行命令
-    docker run -d image_name 后台运行容器。容器使用后台运行，就必须要有一个前台进程。docker发现没有应用，就会自动停止
-	docker run 的参数
-		-i, --interactive=false， 打开STDIN，用于控制台交互
-		-t, --tty=false， 分配tty设备，该可以支持终端登录，默认为false
-		-d, --detach=false， 指定容器运行于前台还是后台，默认为false
-		--restart="no"， 指定容器停止后的重启策略:
-					no：容器退出时不重启
-					on-failure：容器故障退出（返回值非零）时重启
-					always：容器退出时总是重启		
-		--name=""， 指定容器名字，后续可以通过名字进行容器管理，links特性需要使用名字
-		--net="bridge"， 容器网络设置:
-					bridge 使用docker daemon指定的网桥
-					host //容器使用主机的网络		
-		-v, --volume=[本地路径：容器路径]， 给容器挂载存储卷，挂载到容器的某个目录。
-		-p, --publish=[本地端口：容器端口]， 指定容器暴露的端口
-	
-	docker images -a 查看有哪些容器
-    
-	docker ps 显示当前运行的容器
-    docker ps -a 显示所有容器
-    docker ps -aq 显示所有容器的ID
-	docker container ls 查看容器状态
-    
-	docker rmi image_id 删除image
-    docker rmi -f image_id 强制删除image
-    
-	docker rm container_id 删除容器
-    docker rm -f container_id 强制删除容器
-    docker rm -f $(docker ps -aq) 强制删除所有容器
-    
-	docker start container_id 启动容器
-    docker restart container_id 重启容器
-    docker stop container_id 停止容器
-    docker kill container_id 杀掉容器
-    
-	docker logs container_id 查看日志
-    docker logs -t container_id 查看日志，带时间戳
-    
-	docker top container_id 查看容器的进程
-    docker inspect container_id 查看容器信息
-    docker exec -it container_id /bin/bash 进入容器，开启新的终端
-    docker attach container_id 进入容器，进入正在执行的终端，不会启动新的进程
-    docker cp container_id:resource_path destination_path 将容器内文件拷贝到本地文件系统中
-    docker cp destination_path container_id:resource_path 将本地文件系统内文件拷贝到容器中
-    docker run -d --name nginx01 -p 3344:80 nginx 后台运行nginx
-        -d 后台运行
-        --name 给容器取名
-        -p 暴露端口 local_system:container
-    docker stats 查看运行的容器状态
-	docker commit -m comments container_id repository_name:version.minor

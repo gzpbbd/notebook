@@ -2,6 +2,8 @@ python 2 运行出现SyntaxError: Non-ASCII character '\xe8' in file 是因为�
 #encoding:utf-8 即可
 
 解析命令行传递的参数
+    import argparse
+    
 	parser = argparse.ArgumentParser(description='Process some integers.')
 	parser.add_argument('integers', type=int, nargs='+', help='xxx')
 	parser.add_argument('--test_case', type=int, default=1000, help='xxx')
@@ -39,7 +41,8 @@ def init_logging(log_dir='./log', filename=None, extra=None):
     # stream handle
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    console_handler.setFormatter(logging.Formatter("%(levelname)s %(asctime)s: %(message)s",
+                                                   datefmt='%H:%M:%S'))
 
     # setting logging
     logging.getLogger().setLevel(logging.DEBUG)

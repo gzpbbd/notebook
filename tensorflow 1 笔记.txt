@@ -1,0 +1,111 @@
+设置可用的GPU：
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    
+简单样例：
+    import tensorflow as tf
+    import numpy as np
+
+    def inference(input_holder, output_holder):
+        weight = tf.Variable(tf.random_normal([3, 5]), name='dense_weight')
+        bias = tf.Variable(tf.zeros([5, ]), name='dense_bias')
+        output = tf.matmul(input_holder, weight) + bias
+        loss = output_holder - output
+        return loss
+
+
+    x = np.random.normal(size=[8, 3])
+    y = np.random.normal(size=[8, 5])
+    with tf.Graph().as_default() as graph:
+        with tf.Session() as sess:
+            input_holder = tf.placeholder(tf.float32, [None, 3], name='input')
+            output_holder = tf.placeholder(tf.float32, [None, 5], name='output')
+            loss = inference(input_holder, output_holder)
+
+            sess.run(tf.global_variables_initializer())
+            result = sess.run(loss, feed_dict={input_holder: x, output_holder: y})
+            print(type(result), result)
+  
+
+计算图：用于表示计算结构，图中有很多节点，
+
+session：管理计算的中间状态。
+
+Node：声明常量、变量、占位符、操作函数等，本质上都是节点node，即operation。节点的输出是tensor数据
+
+tf.Graph类的定义:
+    关键属性：
+    collections 图中集合列表，如 ['trainable_variables', 'variables', 'train_op', 'summaries']
+     
+    关键方法：
+    add_to_collection
+    add_to_collections
+    as_default 设置为默认图
+    as_graph_def
+    clear_collection
+    control_dependencies
+    create_op
+    with g.device
+    finalize
+    get_all_collection_keys 
+    get_collection 根据集合名得到集合
+    get_collection_ref
+    get_name_scope
+    get_name_scope
+     
+    get_operation_by_name
+    get_operations
+    get_tensor_by_name 根据tensor name 得到tensor
+
+
+tensorflow checkponit 保存模型的文件：
+    model_name.meta: 保存了Graph的结构，没有tensor的值
+    model_name.ckpt-global_step.index 与 model_name.ckpt-global_step.data-xxxxx-of-xxxxx : 保存了模型的每个参数对应的值（tensor_name, value）。后简称 "ckpt 文件"
+    checkpoint: 文本文件，指明目录中有哪些 ckpt 文件
+    
+    假设保存的文件名为:
+        model-20180408-102900.meta
+        model-20180408-102900.ckpt-90.index
+        model-20180408-102900.ckpt-90.data-00000-of-00001
+        
+    有三种方法获取获取 ckpt 中的参数名与值：
+        方法 1： 只读 ckpt，不读入图结构，只打印。
+            from tensorflow.python.tools import inspect_checkpoint as chkp    
+            chkp.print_tensors_in_checkpoint_file('model-20180408-102900.ckpt-90', tensor_name=None, all_tensors=True) # 打印出所有tensors
+            
+        方法 2: 只读 ckpt，不读入图结构，获取tensor name 与 value）    
+            from tensorflow.python import pywrap_tensorflow
+
+            reader = pywrap_tensorflow.NewCheckpointReader('model-20180408-102900.ckpt-90') # 加载值
+            for name in reader.get_variable_to_shape_map().keys(): # 得到一个字典，保存了所有{tensor_name: shape, ...}
+                tensor = reader.get_tensor(name) # 由tensor name得到tensor(ndarray类型)
+                print(name, type(tensor), tensor.dtype, tensor.shape)
+                
+            # tf.contrib.framework.list_variables（或tf.train.list_variables）调用了pywrap_tensorflow
+        方法 3：先加载图结构，再读入 ckpt，获得tensor                
+            sess = tf.Session()
+            saver = tf.train.import_meta_graph('model-20180408-102900.meta') # 从meta文件中读取出计算图的结构
+            saver.restore(sess, 'model-20180408-102900.ckpt-90') # 从 ckpt 中读取每个变量的值
+
+            graph = tf.get_default_graph() # 刚才的图结构加载进了当前的  Graph 中
+            for tensor in graph.as_graph_def().node: # 可以获取计算图的所有Node
+                print(tensor.name)
+
+            weithts = graph.get_tensor_by_name('InceptionResnetV1/Conv2d_1a_3x3/weights:0') # 根据NodeName得到计算图中tensor
+            
+Node的命名：
+    tensorflow声明时允许同名节点，但是底层会自动给节点名字末尾加上一个标号，如果声明了两个 name="data"，
+    则一个为 data，另一个为data_1
+    
+Node是计算图中的节点；tensor是计算图中的边，是节点流出的数据的值
+tensor_name与node_name命名规则：
+    如果一个 node_name 为 "data"
+    则其得到的 tensor_name 为 "data:0"
+    
+    
+对于 tf.Variable 类型， var.name 得到tensor的名字，var.op.name 得到节点的名字    
+                    
+
+
+    
+    
