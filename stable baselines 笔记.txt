@@ -1,0 +1,63 @@
+evaluate_policy() 函数可以用于评估模型或者模型的 policy
+make_vec_env()，配合类 DummyVecEnv, SubprocVecEnv 使用，可用于创建多个环境
+make_atari_env() 可用于创建多个 atari 环境
+VecNormalize 环境的正则化包装器，可以用于正则化 observations 与 actions
+set_random_seed() 设置 random numpy torch 的随机数种子
+results_plotter 模块是用于读取 Monitor 写的日志，画图
+callbacks 模块是用于在训练过程中完成一些特定动作，比如评估、保存模型
+
+model.predict（）中的 deterministic 表示输出确定的动作（概率最大），还是按概率随机选择一个动作
+model.policy 是 torch 的 nn.Module。通过向参数添加随机值，然后取多组好的结果的平均值。迭代多次，可以得到比较好的结果。
+
+文档提供的例子： https://stable-baselines3.readthedocs.io/en/master/guide/examples.html
+    训练，保存，加载模型
+    使用多个环境
+    接收多个observation
+    使用callback
+    正则化输入与输出
+    HER强化池
+    设置 learning rate schedule
+    单独保存与加载 policy、replay buffer
+    手动修改模型的权重
+    将环境的 observation 记录为 video 或者 GIF 
+    
+写日志： https://stable-baselines3.readthedocs.io/en/master/guide/tensorboard.html
+    内部的有一个 Logger，负责记录日志。
+    如果一种是直接输出到控制台，一种是 tensorboard 日志。如果在创建算法时，设置了 tensorboard_log，就会记录日志
+    
+对于 NaN 与 inf 值，有一些检测方法： https://stable-baselines3.readthedocs.io/en/master/guide/checking_nan.html
+    torch: torch.autograd.set_detect_anomaly(True)
+    numpy: numpy.seterr(all='raise') 
+    
+一些类：
+    Monitor 包装了 gym.Env，从而记录一些数据（len, reward, info 等）
+    
+    common.vec_env 中都是 gym.Env 的包装器：
+        DummyVecEnv： 在单个线程中创建多个环境，依次与多个环境交互，然后返回多个环境的结果.
+                        并没有利用多线程。
+        SubprocVecEnv： 使用了多个线程。主程序代码需要放在 “if __name__ == '__main__':” 内。
+                        对于简单环境，多线程的开销会大于性能的提升。
+                        
+                        
+框架结构：https://stable-baselines3.readthedocs.io/en/master/guide/developer.html
+    BaseAlgorithm 内部会有一个 BasePolicy。
+        policy 是 torch 模型。有 forward 方法。
+            如果是 actor-critic 类型。那么会包括 critic、actor 网络
+        algorithm 调用 policy，收集数据、训练 policy
+    algorithm 的 learn() 会调用 self.collect_rollouts() 与 self.train() 分别是收集数据与训练 policy
+    收集到的数据会放入 BaseBuffer 类中。
+    BaseBuffer 有好几种子类：
+        RolloutBuffer： 
+            被 OnPolicyAlgorithm 使用。每次 collect_rollouts() 内都会先清空 buffer
+        ReplayBuffer: 
+            被 OffPolicyAlgorithm 使用。buffer 内数据不会被清空，会被重复使用多次
+           
+    ActorCriticPolicy 结构：
+        features_extractor: 提取特征
+        mlp_extractor： 返回 latent_pi, latent_vf （都是二维张量）
+        action_net：根据 latent_pi 得到动作 （参考 Distribution 类）
+        value_net: 根据 latent_vf 得到 state value (一维张量)
+            
+https://stable-baselines3.readthedocs.io/en/master/guide/developer.html#state-dependent-exploration
+        
+    

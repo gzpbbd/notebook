@@ -1,0 +1,42 @@
+Analyzer:
+    field:
+        sess: BiSession 类，内部有 sys_agent，user_agent，evaluator
+        user_agent
+    method:
+        __init__
+        comprehensive_analyze：调用 sess.next_turn 运行多轮。很多代码都是用于输出结果
+    
+BiSession：
+    filed:
+        user_agent: PipelineAgent 类
+        sys_agent： PipelineAgent 类
+        evaluator
+        
+        kb_query
+        dialog_history
+        __turn_indicator
+    method:
+        __init__
+        next_turn: user 与 system 进行一轮对话。
+        next_response
+        
+一个问题：
+    不使用 env 时，一轮可以持续10多个来回
+    使用 env 时，一轮经常只有2个来回
+    
+    由 PipelineAgent.policy.policy.agenda.__stack
+    
+convlab2/policy/mle/multiwoz/train.py:
+    manager = ActMLEPolicyDataLoaderMultiWoz
+        field:
+            vector = MultiWozVector
+            data: 字典格式的数据
+            
+    data_loader = ActPolicyDataloader(dataset_dataloader=MultiWOZDataloader())
+    
+    agent = MLE_Trainer(manager, cfg)
+        field:
+            vector = MultiWozVector
+            policy = MultiDiscretePolicy
+            data_train = manager.create_dataset
+        

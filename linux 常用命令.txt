@@ -44,7 +44,7 @@
     rar a etc.rar /etc 压缩文件
     unrar x file.rar 解压文件
 	unzip 压缩包名 解压文件
-	du -h -d 1 path 查看路径下的文件的磁盘占用大小
+	du -h -ld 1 path 查看路径下的文件的磁盘占用大小
 	scp -r [[user@]host1:]file_source  [[user@]host2:]file_target  服务器间的文件拷贝
 	rsync -av SRC [USER@]HOST::DEST 服务器间的文件同步
 	rsync -av [USER@]HOST::SRC DEST 

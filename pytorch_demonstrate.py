@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # 实例化损失函数、优化器
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.RMSprop(net.parameters(), lr=0.001)
 
     total_loss = 0
     for epoch in range(2):
