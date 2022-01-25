@@ -21,33 +21,33 @@ import time
 import os
 
 
-def init_logging(log_dir='./log', filename=None, extra=None):
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
+def init_logging(filepath='./log/output.log', log_level=logging.DEBUG):
     # file handler
-    if filename:
-        file_handler = logging.FileHandler(os.path.join(log_dir, filename), mode='w')
-    else:
-        # current_time
-        current_filename = __file__.split('/')[-1].replace('.', '_')
-        current_time = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
-        file_handler = logging.FileHandler(
-            '{}/{}_{}_{}.log'.format(log_dir, extra, current_filename, current_time))
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logging.Formatter(
-        '%(message)s\n                       - %(levelname)s %(asctime)s %(filename)s (%(funcName)s %(lineno)d)'))
+    abs_path = os.path.abspath(filepath)
+    dir_name = os.path.dirname(abs_path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+	
+	# 下面格式在pycharm中打印出的日志可以跳转
+	# format="%(filename)s:%(lineno)d %(funcName)s %(asctime)s %(levelname)s | "
+    #                               "%(message)s" 
+    formatter = logging.Formatter(
+        "%(levelname)9s %(asctime)s: %(filename)-20s (%(funcName)-20s %(lineno)4d) |  %(message)s",
+        datefmt='%H:%M:%S')
+    file_handler = logging.FileHandler(filepath, mode='w')
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
 
     # stream handle
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter("%(levelname)s %(asctime)s: %(message)s",
-                                                   datefmt='%H:%M:%S'))
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
 
     # setting logging
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(log_level)
     logging.getLogger().addHandler(file_handler)
     logging.getLogger().addHandler(console_handler)
+    logging.debug('write log to {}'.format(abs_path))
 
 
 init_logging(filename='run.log')
@@ -109,3 +109,14 @@ pickle保存数据：
 	with open(PATH, 'r') as f:
 		data = json.load(f)    
 	（2） dumps、loads 作用于 str 类型
+	
+pandas:
+import pandas as pd
+wm_train_res = pd.DataFrame(columns=['epoch', 'acc_reward'])
+wm_train_res = wm_train_res.append(
+                    {'episode': 1, 'acc_reward': 0.98, ignore_index=True)
+wm_train_res['epoch'] = wm_train_res['epoch'].astype(int)
+df.insert(0, 'algorithm', dir_algorithm['algorithm'])
+wm_train_res.to_csv('out.csv', index=False)
+
+pd.read_csv('out.csv')

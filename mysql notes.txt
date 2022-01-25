@@ -1,0 +1,14 @@
+笔记：
+	等值连接，也称为内部联结：
+		SELECT * FROM products, vendors where products.vend_id=vendors.vend_id;
+		或 
+		SELECT * FROM products INNER JOIN vendors ON products.vend_id=vendors.vend_id;
+		
+	自联结：联结的表是同一个表
+		SELECT p1.prod_id, p1.prod_name FROM products p1, products p2 WHERE p1.vend_id=p2.vend_id and p2.prod_id="dtntr";
+	自然联结： 排除相同列多次出现，使得每个列只返回一次
+		SELECT products.*, vend_name FROM products, vendors where products.vend_id=vendors.vend_id;
+		
+		自然联结属于等值连接（内部联结）。但是非自然联结的等值连接（内部联结）因为包含了重复的列，所以实际中没有使用价值。
+	
+	

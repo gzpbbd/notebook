@@ -1,0 +1,91 @@
+程序 Tex Live Document 可以查看文档
+
+基本结构：
+    \documentclass{article} 文档类
+    \usepackage{times} 使用宏包
+    \section{Introduction} 章节
+    \section*{⟨title⟩} 不带编号的章节，也不生成它的目录项和页眉页脚。
+    \subsection{Footnotes} 二级章节
+    \appendix 将之后的内容划分为附录。用 \appendix 后，最高一级章节改为使用拉丁字母编号，从 A 开始
+
+
+
+标题相关：
+    \title{Instructions for *ACL Proceedings}  文章标题
+    \author{Author name} 作者名
+    \and 在author 中隔开多个人名
+    \\ 换行
+    \maketitle 制作标题
+
+字体与样式：
+    \centering 中心对齐之后的内容 
+    \verb|\title| 排版简短的代码或关键字
+    \texttt{acl.tex} 等宽字体
+    \textbf 粗体
+    \emph{e.g.} 强调。默认斜体
+    {} 一个空格？
+
+交叉引用与URL：
+    \label{tab:accents} \ref{tab:accents} 生成交叉引用。括号内为标记的规范命名(sec:xxx,tab:xxx 等)。见 latex PDF page 22 (34 / 138) 中 \label 的放置位置
+    \url{https://aclweb.org/anthology/anthology.bib.gz} URL
+
+表格相关:
+    & 在表格中用作分隔列
+    \hline 添加横线
+
+参考文献相关：
+    \citep{Gusfield:97} 引用参考文献为 (Gusfield, 1997)
+    \citealp{Gusfield:97} 引用参考文献为 Gusfield, 1997
+    \citet{Gusfield:97} 引用参考文献为 Gusfield (1997)
+    \citeyearpar{Gusfield:97} 引用参考文献为 (1997)
+    \nocite{Ando2005} 列出未被应用的参考文献。不会在正文中显示内容
+    \bibliographystyle{⟨bst-name⟩} 选择参考文献样式。这里 ⟨bst-name⟩ 为 .bst 样式文件的名称， 不要带 .bst 扩展名。
+    \bibliography{⟨bib-name⟩} 将该命令放在参考文献的位置，制作参考文献内容。其中 ⟨bib-name⟩ 是 BIBTEX 数据库的文件名， 不要带 .bib 扩展名。
+
+
+环境：
+    \begin{quote}  \end{quote} 生成一个环境.
+        一些环境：
+            document 整个文档
+            abstract 摘要
+            table 表格悬浮体
+            table* 双栏环境下排版跨双栏的悬浮体
+            tabular 表格。\begin{tabular}{lcr} 表示有三列，对齐方式分别为 left, center, right
+            quote 用于引用较短的文字，首行不缩进
+            verbatim 将一段代码原样转义输出，这就要用到代码环境，它以等宽字体排版代码，回车和空格也分别起到换行和空位的作用
+
+
+文件说明:
+    .tex 源代码文件
+    .sty 宏包文件。宏包的名称与文件名一致。
+    .cls 文档类文件。文档类名称与文件名一致。
+    .bib BIBTEX 参考文献数据库文件。
+    .bst BIBTEX 用到的参考文献格式模板。    
+    
+算法伪代码相关：
+    宏包 algorithm、algorithmic
+    \REQUIRE require
+    \ENSURE ensure
+    \IF{condition} \ELSE \ENDIF if 语句
+    \WHILE{condition} \ENDWHILE while 语句
+    \Repeat \Until{condition}
+    $formula$ 公式用 $ 包裹
+    \STATE 普通语句
+    
+    \gets 赋值
+    \neq 不等于
+    \geq 大于或等于
+    
+    ^{上标} 上标
+    _{下标} 下标
+    
+    替换 \REQUIRE 与 \ENSURE 的文字
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}  % Use Input in the format of Algorithm
+    \renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm
+    
+    几个相关的宏包的区别
+        algorithm - float wrapper for algorithms.
+        algorithmic - first algorithm typesetting environment.
+        algorithmicx - second algorithm typesetting environment.
+        algpseudocode - layout for algorithmicx.
+        algorithm2e - third algorithm typesetting environment.

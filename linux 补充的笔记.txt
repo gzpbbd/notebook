@@ -1,0 +1,1 @@
+script -f 命令可以记录其他命令的输出。它本质是新建了一个 terminal，记录其中的所有操作。 使用 exit 退出该 terminal. 默认输出文件名为 typescript，其中有轻微乱码，使用 cat typescript 可以看到非乱码的文字。

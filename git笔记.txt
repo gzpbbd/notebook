@@ -33,3 +33,13 @@ git 的命令：
     push 本地代码上传到 remote
     fetch 将 remote 的更新拉取到本地，但是不与本地分支合并。不会对本地代码造成影响。
     pull 先将 remote 的更新拉去到本地，再与本地分支合并。会对本地代码造成影响。
+	
+	
+	git remote 查看当前配置的远程仓库列表
+	git remote -v 包括对应的url
+
+	git fetch --all 拉取远程仓库所有分支
+	
+配置代理：
+	export http_proxy="http://127.0.0.1:7890"
+	export https_proxy="http://127.0.0.1:7890"

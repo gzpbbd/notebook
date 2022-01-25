@@ -93,4 +93,5 @@ docker 命令:
     
 启动 docker container 中的的 ssh 服务：
     /usr/sbin/sshd -D &
+	service ssh start
     

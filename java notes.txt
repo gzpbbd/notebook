@@ -1,0 +1,2209 @@
+IDEA:
+    快捷键：
+        导入包，生成方法的返回值，实现接口的方法 alt+enter
+        自动生成方法的返回值 ctrl+alt+v
+        运行测试代码 ctrl+shift+F10
+        查看接口的实现层次结构 ctrl+h
+        生成方法 alt+insert
+		重写父类方法： Ctrl+O
+        导入 maven 依赖 ctrl+shift+O
+		全局搜索 class: ctrl+n
+		复制类路径：ctrl+alt+shift+C
+		
+    代码简写:
+        soutp System.out.println();
+    添加依赖包：
+        File -> project sturcture -> modules -> dependencies -> + 选择对应的 jar包
+        
+    单元测试：
+        依赖的包: junit 4
+        测试过程：  
+            对于想要测试的类，对其加上注解 @Test
+            右键，点击 "Run xxx()"
+            绿色表示结果正确
+			
+	部署 web 项目：
+		Idea 使用 debug 可以热部署 web 项目（修改了方法实现或者html文件内容等，会自动更新）
+		Idea 部署 web 时如果修改了类或者方法签名，必须重新 redeploy
+		
+	如果使用 maven, 添加了静态资源后，可能需要重新在 maven 的 lifecycle 中点击 package
+   
+部署SpringBoot项目到轻量应用服务器：
+	1. 购买轻量应用云服务器
+	可选2. 安装宝塔面板，从宝塔面板中安装一些必要的软件，比如 mysql
+	
+	
+	
+	问题：
+		端口被占用：
+			查看占用端口的进程: netstat -anop | grep port 
+			停止nginx: nginx -s quit
+			
+		chrome 返回时 url 时状态码显示from disk cache，可以手动清除chrome的缓存:
+			打开谷歌浏览器(Chrome)，点击上方右侧的菜单按钮，依次进入“工具”--“清除浏览器数据”，或使用快捷键CTRL+SHIFT+DEL
+		java -jar SpringBootProject.jar 运行失败，错误提示为 Caused by: java.net.SocketException: Permission denied：
+			在centos上只有root用户才可以使用1024以下的端口号
+运行spring代码时错误：
+    xml 文件未找到
+    类加载器找不到类 commons.logging（添加 commons-logging-1.1.1.jar 到lib目录中，相当于添加依赖）
+    
+	
+	
+Spring:        
+        程序中使用 bean:
+            ApplicationContext context = new ClassPathXmlApplicationContext("bean1.xml"); // 加载配置，得到容器
+            User user = context.getBean("user_1", User.class); // 获取创建的对象 bean
+            
+DI(Dependency Injection 依赖注入):
+        XML DI(依赖注入)：
+            内容： 定义 bean, 有参构造函数设置属性，setter直接设置属性，利用p标签注入属性，XML输入特殊字符，设置其它bean为属性，注入集合为属性，抽取list为外部bean, FactoryBean、bean的作用域（单/多实例）、bean的生命周期(设置init与destroy方法，BeanPostProcessor)、autowire属性(byName, byType)、引入外部属性文件
+            
+            spring xml 中定义 bean:
+            <bean id="user_1" class="com.hcp.spring5.User"></bean>
+            
+        XML 使用注解进行配置：
+            
+            配置类 开启组件扫描(Configuration、ComponentScan)
+                @Configuration
+                @ComponentScan(basePackages = {"com.hcp"})
+                public class SpringConfig {
+                }
+            程序中使用 bean:
+                ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class); // 加载配置，得到容器
+                User user = context.getBean("user_1", User.class); // 获取创建的对象 bean
+                
+            内容：声明bean的注解（Component(value),Service,Controller,Repository,默认bean ID为类名首字母小写）、XML开启组件扫描的扫描表达式、装配属性的注解（Autowired、Qualifier(value)、Value、javax提供的Resource）
+            
+    
+AOP (Aspect Oriented Programming 切面编程)：
+    内容: AOP原理（接口、类如何增强，JDK 内部的Proxy类）、术语(通知 advice, 连接点 JoinPoint, 切入点 PointCut, 切面 Aspect, 引入 introduction, 目标 target, 代理 proxy, 织入 weaving)、通知的不同类型、切入点表达式、设置不同切面的执行优先级
+            
+			
+JDBCTemplate:
+	Druid 是连接池、JDBCTemplate创建时需要使用连接池、
+	使用 JDBCTemplate 进行增删改查(update, query, batchUpdate, queryForObject)、使用 BeanPropertyRowMapper 映射关系到类的属性
+	
+事务:
+	不同的事务管理管理器、开启事务的注释驱动(tx:annotation_driven)、注解为事务
+			
+                   
+注解：
+    @Component：用于生成Bean。修饰PIPO类。默认的Bean名称为首字母小写后的类名。可以使用 @Component("beanName")指定生成的Bean的名称。
+    @ComponentScan 默认扫描当前包
+    @Autowired：自动按类型注入Bean
+    @Qualifier("cd")：与@Autowired配合使用，可以指定被注入的Bean的名字
+    
+    @RunWith(SpringJUnit4ClassRunner.class)：对Spring使用Junit测试时需要用在测试类上方    
+    @ContextConfiguration(classes = CDPlayerConfig.class)：指定ApplicationContext对应的Java配置类。在测试类上方使用。
+    
+    @Bean：在配置类中用于装饰方法，将方法的返回值作为Bean，默认的Bean名称为方法名。可以用 @Bean("cd") 指定生成的Bean的名称
+	
+	如果只有一个属性需要赋值，并且属性的名称是value，则value可以省略
+                
+                
+Junit4测试时，IDEA中红色代表程序出错，黄色代表测试未通过。
+    红色：代表程序出错。比如Spring中指定名字的Bean不存在
+    黄色：代表测试未通过
+    
+    
+Spring: 
+    创建Bean的多种方式:
+        XML
+        @Bean，用于方法
+        @Component @Service @Repository @CDPlayerConfig 等, 用于类。这些Bean 需要开启自动扫描后才会被自动创建
+    使用Bean:
+        @Autowired 自动byType注入Bean。可以在其后使用 @Qualifier，实现 byName 注入 Bean
+    开启自动扫描:
+        XML
+        @ComponentScan 用于配置类的注解，可以指定扫描的路径
+    注入非Bean的值:
+        XML 
+        @Value 用于属性
+    配置
+        XML
+        @Configuration 注解。用于类。之后可以使用 new AnnotationConfigApplicationContext(ConfigName.class) 加载该配置类，从而后续获取其内的Bean
+    获取 ApplicationContext:
+        AnnotationConfigApplicationContext 加载 java 配置类
+        ClassPathXmlApplicationContext 按 ClassPath 查找 XML 文件
+        FileSystemXmlApplicationContext 按 FileSystem 查找 XML 文件
+    获取 ApplicationContext 内所有的 Bean：
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+        for (String beanName : context.getBeanDefinitionNames()) {
+            System.out.printf("%s: ", beanName);
+            System.out.println(context.getBean(beanName));
+        }
+		
+	DI（依赖注入） 相关：
+		注解：
+			@Bean 用于方法，方法的返回值注册为bean
+			@Component @Service @Repository @CDPlayerConfig 等, 用于类。这些Bean 需要开启自动扫描后才会被自动创建
+			@Autowired 自动byType注入Bean。可以在其后使用 @Qualifier，实现 byName 注入 Bean
+			@Value 用于属性。按表达式注入值
+			@Configuration 声明 Spring 配置类
+		接口：
+			ApplicationContext 应用上下文。保存了所有创建了的 bean。可以使用getBean获取 bean
+		7类：
+			AnnotationConfigApplicationContext 基于 java 配置类创建应用上下文
+			ClassPathXmlApplicationContext/FileSystemXmlApplicationContext 基于 XML 配置文件创建应用上下文
+			 
+			
+		
+		
+	AOP（切面编程） 相关：
+		需要把被切入的类和通知所在的类创建为 bean
+		
+		注解：
+			五种通知：
+				@Before 前置通知
+				@AfterReturning 成功执行之后
+				@AfterThrowing 出现异常时
+				@After 在所有执行之后
+				@Around 可以手动调用 ProceedingJoinPoint pj.proceed()。比较灵活
+			@Aspect 声明一个切面
+			@PointCut 定义切点
+			@Order 设置不同切面的优先级
+			@EnableAspectJAutoProxy 使能AOP
+		其他：	
+			excuttion 表达式。用于筛选连接点。结合通知注解或者@PointCut注解使用
+			
+			
+	JDBCTemplate相关：
+		注解：
+		接口：
+			DataSource 连接池。需要配置 URL（jdbc:mysql://10.12.42.72:3306/java），数据库驱动器，用户名，密码
+		类：
+			DruidDataSource Druid 连接池，
+			JdbcTemplate 基于连接池，操作数据库。常用方法为 query/update/batchUpdate/queryForObject
+			
+		
+		
+	事务相关：
+		注解：
+			@Transactional 声明事务
+			@EnableTransactionManagement 开启事务管理
+		接口：
+			TransactionManager 事务管理器
+		类:
+			DataSourceTransactionManager JDBC 事务管理器
+		其他：
+			<tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven> 向Srping注入事务管理器
+			
+			
+java日志：
+	因为追求性能，所以生产环境不使用 java 自带的日志库
+	框架分类：
+		门面框架：同一程序写日志的接口。依赖底层日志框架的实现。
+			slf4j 流行， JCL
+		实现类框架：
+			log4j2 流行, logback, log4j, jul(java官方库)
+	slf4j: 
+		术语：
+			binding 底层绑定的日志实现框架
+		包：
+			slf4j-api-${latest.stable.version}.jar 
+		常用级别：
+			debug, info, warn, error
+		样例：
+			Logger logger = LoggerFactory.getLogger(AppTest.class);
+			logger.error("a log {} {}", 1,"hello world");
+		
+	log4j2: 
+		版本从 2.0.0 开始。与log4j的架构不相同
+		术语：
+			Logger: 用于记录日志的类
+			LoggerConfig：每个Logger需要绑定的配置类
+			Appender: 出现日志事件的类，如对应控制台、文件、数据库等
+			Filter: 过滤日志事件的过滤器
+		配置文件：
+			有几种。常用的为 resource 文件夹下的 log4j2.xml
+			log4j2.xml 的标签结构：
+				Configuration: status 控制的是 log4j2 内部的日志信息
+					properties: 可以声明属性，既字符串变量，被文件内其它地方使用
+					Appenders: 真正记录日志时间的东西。如 Console, File, RollingRandomAccessFile
+					Loggers: 日志记录器，需要绑定 Appdender。会将日志事件委托给 Appender 。
+			注：Logger、Appender 都可设置记录级别，也可额外绑定 Filter
+			
+		一个可用的 log4j2.xml 文件为:
+			<?xml version="1.0" encoding="UTF-8"?>
+			<Configuration status="info" monitorInterval="5">
+				<properties>
+					<Property name = "pattern" > %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} %l - %msg%n </Property>
+				</properties>
+				<Appenders>
+					<Console name="Console" target="SYSTEM_OUT">
+						<PatternLayout pattern="${pattern}" />
+					</Console>
+					<File name="File" fileName="logs/test.log" append="false">
+						<PatternLayout pattern="${pattern}" />
+					</File>
+				</Appenders>
+
+				<Loggers>
+					<logger name="org.apache.ibatis" level="info"></logger>
+					<Root level="trace">
+						<AppenderRef ref="Console" />
+						<AppenderRef ref="File" />
+					</Root>
+				</Loggers>
+			</Configuration>		
+			
+	slf4j 与 log4j2 的版本需要对应，下面是可用的 maven 依赖：
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+        <!--  log4j 对 slf4j 的 binding 实现  -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <!--  下面两个是 log4j2 的包  -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+				
+
+	
+java web:
+	tomcat 默认访问文件:
+		ROOT 文件夹
+		index.html
+		index.hml
+		index.jsp
+		
+	IDEA创建 java web 项目：
+		对模块右键 add frameworks support，选择 web application
+		在 WEB-INF 下创建 lib 文件夹，用于存放 jar 包。在之后，顶层src下的文件不会被部署
+		
+		tomcat local 下 deployment 选择 war exployed 方式，为热部署（需要使用 debug 模式，java 代码才会动态更新）
+		
+	IDEA 创建 maven 的多模块 web 项目：
+		1. 父项目为普通 maven
+		2. 子模块为 maven webapp
+			在子模块的 src/main 下创建 java 与 source 目录并标记
+			
+		
+	IDEA 内 tomcat 乱码问题：
+		https://www.cnblogs.com/benchover/p/10773098.html
+		只修改 Tomcat logging.properties 文件，或者只修改 idea 和运行时的vm的 -Dfile.encoding=UTF-8 参数
+		
+		
+servlet：
+	生命周期：
+		web.xml中的servlet的创建是在第一次访问时创建的（init）。之后一直存在。
+	
+	乱码问题：
+		response 中:
+			response.setContentType("text/html;charset=utf-8"); 需要在 response.getWriter()前使用
+		request 中:
+			request.setCharacterEncoding("utf-8");
+	
+		
+	idea 右键 new servlet 可以快捷生成 servlet 类文件
+	
+	servlet的几种重要的类：
+		ServletConfig：
+			1. 在 servlet 的 init(ServletConfig config) 方法中获取
+			2. 在任意方法内使用 this.getServletConfig() 获取
+			常用方法：
+				getServletContext
+				getServletName
+				getInitParameter: 对应 web.xml 中 <web-app> -> <servlet> -> <init-param> 的参数
+		ServletContext: 由 ServletConfig 的 getServletContext() 方法获得
+			常用方法：
+				getInitParameter: 对应 web.xml 中 <web-app> -> <context-param> 的参数
+				getRealPath
+		HttpServletRequest、HttpServletResponse: 在 doGet、doPost 中获取
+			注意: 
+				request 的 parameter: 浏览器发请求时带的参数
+				request 的 attribute: servlet 设置的参数
+				
+			request:
+				可以请求转发。在服务器内部间转发
+			response:
+				可以设置重定向。是在客户端重定向
+				
+		RequestDispatcher: 
+			获取：由request.getRequestDispatcher 方法得到
+			作用：用于转发请求给当前服务器内的其它 servlet。不能跳转到服务器外部的资源
+			
+JSP:
+	几种 jsp 指令：
+		指令：<%@ 指令名 属性="值" %> 
+			用于设置页面的属性
+			常用
+			
+		声明：<%!  %>
+			写 java 代码， 声明 Servlet 类的类成员变量和方法
+			几乎不用
+			
+		程序片段：<%  %>
+			如何有效的java代码
+			几乎不用，而用 JSTL 代替
+			
+		java表达式：<%=  %>
+			用于输出值到页面
+			
+			几乎不用，而用 EL 代替
+	
+			
+	域对象：
+		pageContext (PageContextImpl 类):
+			当前 jsp 页面范围内有效
+		request  (HttpServletRequest 类):
+			一次请求内有效
+		session  (HttpSession 类):
+			一个会话范围内有效（打开浏览器访问服务器，直到关闭浏览器）
+		application   (ServletContext 类):
+			整个 web 工程范围内都有效（只要 web 工程不停止，数据都在）	
+			
+EL 表达式与 JSTL 标签库：
+	EL 表达式：
+		${表达式}
+		用于替换 jsp 的表达式脚本（<%=  %>）
+	
+	JSTL 标签库：
+		用于替换 jsp 的代码脚本（<%  %>）
+		在 jsp header 中引入：
+			<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+		命名规范：
+			<c:xxx>
+		
+		
+	
+	
+			
+java web 监听器：Listener
+	servletConext、session、session attribute 等被创建或销毁会被调用特定的方法
+	IDEA 右键可快捷生成 Listener 类
+	可以通过扩展 ServletContextListener, HttpSessionListener, HttpSessionAttributeListener 等重写不同的监听器方法:
+		contextInitialized(ServletContextEvent)		
+		contextDestroyed(ServletContextEvent)
+		
+		sessionCreated(HttpSessionEvent)
+		sessionDestroyed(HttpSessionEvent)
+		
+		attributeAdded(HttpSessionBindingEvent) 
+		attributeRemoved(HttpSessionBindingEvent) 
+		attributeReplaced(HttpSessionBindingEvent) 
+		
+		
+	
+Cookie:
+	保存在客户端
+		使用 request.getCookies() 获取
+		使用 response.addCookie() 发送
+	可用属性：
+		name
+		value
+		path
+		domain
+		maxAge: -1 表示浏览器关闭时失效		
+	修改 cookie 的值：
+		用 resp.addCookie(new Cookie(name, value)) 发送一个同名 cookie，将旧值覆盖掉
+		
+Session:
+	保存在服务器端。一个浏览器对应一个session
+		request.getSession() 获取 session
+	方法：
+		setMaxInactiveInterval 设置有效时间间隔
+		getAttributeNames
+		getAttribute
+		
+Filter:
+	用于在调用 Servlet 前检查请求。
+	可以在 web.xml 中设置
+	方法：
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+		使用 chain.doFilter(request, response) 执行后续过滤器
+		
+java 操作 json:
+	官方没有提供库。
+	Gson 比较方便：
+		Gson gson = new Gson();
+		gson.toJson() 对象 -> 字符串
+			gson.toJson(new Person("黄辰平", 23))
+		gson.fromJson() 字符串 -> 对象
+			gson.fromJson(person, Person.class)
+			gson.fromJson(sPeople, new TypeToken<List<Person>>(){}.getType())
+		
+		
+Servlet、Listener、Filter 都是由 Tomcat 容器保管。在整个运行期间只有一个实例。
+
+Tomcat 配置错误页面：
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error/404.html</location>
+	</error-page>		
+
+windows 端口:
+	查看端口占用情况: netstat -ano|findstr port_id
+	杀进程:taskkill -F -PID pid
+	
+Thymeleaf:
+	模板引擎：将字符串模板中的一些标记，解析出来，用数据进行替换
+	其它的模板引擎：Freemarker
+	概念：
+		Context: 保持了数据的上下文，使用 context.setVariable 设置变量
+		ClassLoaderTemplateResolver: 用于加载模板，可以使用 setPrefix 与 setSuffix 设置查找模板时的路径
+		TemplateEngine: 模板引擎，用其 process 方法解析模板。
+			使用 ClassLoaderTemplateResolver 加载模板，再使用 Context 中的数据替换模板中的一些特殊标记，最后生成字符串。
+	样例：			
+        Context context = new Context();
+        context.setVariable("name", "张三");
+
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("/templates/");
+        resolver.setSuffix(".html");
+
+        TemplateEngine engine = new TemplateEngine();
+        engine.setTemplateResolver(resolver);
+
+        System.out.println("input=" + engine.process("user", context));
+		
+	中文教程：https://fanlychie.github.io/post/thymeleaf.html
+		thymeleaf 有特定的语法，比较简单
+
+视图解析器：
+	视图名字符串的三种情况：
+		前缀为：“forward:”
+			转发的只能为 servlet 路径
+		前缀为：“redirect:”
+			return "redirect:http://www.bilibili.com";
+		无上述两种前缀：
+			会使用 Thymeleaf 合并设置的前缀后缀，然后查找文件。属于转发
+	视图控制器view-controller：
+		在 springMVC.xml 中设置
+		当只需要转发，而不需要使用 java 代码进行处理时使用。免去了定义java类和方法的代码量
+			<mvc:annotation-driven/>
+			<mvc:view-controller path="/red" view-name="redirect:http://www.bilibili.com"/>
+			<mvc:view-controller path="/thy" view-name="/home"/>
+	
+	使用 thymeleaf 时，<html> 标签内好像无需加上 xmlns:th="http://www.thymeleaf.org" 也可以使用
+	thymeleaf 可以抽取出多个页面的公共部分放入一个 html 页面中，然后其它的页面直接导入公共页面中的部分内容：
+		公共文件 commonName.html: 
+			<div th:fragment="content"> 公共内容 </div>
+		特定文件：
+			<div th:replace="commonName :: content"></div> 不保留引用标签
+			<div th:include="commonName :: content"></div> 保留引用标签
+	
+Restful 接口：
+	create /user post
+	update /user post ?_method=put 
+	delete /user/id post ?_method=delete
+	read /user/id get
+	
+	需要在 web.xml 中增加 HiddenhttpMethodFilter，且位置在 CharacterEncodingFilter 之后
+	
+
+Vue：
+	入门：
+		<div id="app">
+			{{message}}
+		</div>
+		
+		<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+		<script>
+			var app = new Vue({
+				el: '#app',
+				data: {
+					message: 'hello 臭臭'
+				}
+			})
+		</script>	
+	
+	概念：
+		{{data}}: 插值表达式
+		{string: condition}: 对象表达式。如果 condition==true, 值为 string；负责值为空
+		el: 挂载点，使用选择表达式挂载到 element 上。 # 为 id 选择器, . 为 class 选择器
+		data: 数据对象，使用键值对的形式表示。值可为字符串、列表、字典等，可被插值表达式和 vue 指令等使用
+		methods: 方法。使用 this.variable 访问 data 内对象
+			methods: {
+				changeFood: function () {
+					console.log(this.food)
+					this.food += "好吃呀"
+				}
+			}
+			
+		
+	
+	v- 指令:
+		v-text: 将数据写入标签体内
+		v-html: 类似 v-text，不过会渲染 html 元素
+		v-bind: 为元素的属性绑定数据。
+			可以简写为 ':'		
+		v-on: 绑定事件，如 v-on:click='changeFood' 将 onclick 绑定到名为 changeFood 的 js 函数。
+			可以简写为 @click='changeFood'
+		v-model: 用于双向绑定表单的内容
+			
+		v-if: 类似于 v-show。不过 v-if 控制是否添加或者删除 dom 元素。		
+		v-show: 控制是否显示元素。表达式的值会被转为 bool 类型。
+			底层使用 style 控制 dom 是否显示			
+		
+		v-for: 用于遍历元素
+	
+	axios: 是一个发 http 请求的库
+		axios.get(url)
+			.then(response=>{})
+			.catch(error=>{})
+			
+	用法：
+		<div id="app">
+			<li v-for="user in userList" v-if="user.age<=22">{{user.age}}, {{user.name}}</li>
+			------------
+			<li v-for="user in userList" v-show="user.age>22">{{user.age}}, {{user.name}}</li>
+			------------
+			<input type="text" v-model:value="message">
+			<a :href="message" @click.prevent="click" v-text="message"></a>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+		<script>
+			var app = new Vue({
+				el: '#app',
+				data: {
+					message: 'hello 臭臭',
+					userList: [
+						{'name': 'xcc', 'age': 21},
+						{'name': 'gzp', 'age': 22},
+						{'name': 'xnn', 'age': 23},
+					]
+				},
+				methods: {
+					click: function () {
+						alert('阻止了跳转到 "' + this.message + '" 的请求');
+					}
+				}
+			})
+		</script>
+		
+
+	
+Spring MVC parameter 中文乱码
+	dubug 中文正常
+	tomcat server console 中文乱码
+	估计是 tomcat 日志的问题	
+	
+SpringMVC:
+	web.xml 需要配置 DispatcherServlet，指定其参数 contextConfigLocation 为 spring 的配置文件(例如springMVC.xml)
+	spring 配置文件中需要开启自动扫描和 Thymeleaf 解析器
+		<context:component-scan base-package="com.hcp"></context:component-scan>	
+		
+		<!-- 配置Thymeleaf视图解析器 -->
+		<bean id="viewResolver"
+			  class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+			<property name="order" value="1"/>
+			<property name="characterEncoding" value="UTF-8"/>
+			<property name="templateEngine">
+				<bean class="org.thymeleaf.spring5.SpringTemplateEngine">
+					<property name="templateResolver">
+						<bean
+								class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+							<!-- 视图前缀 -->
+							<property name="prefix" value="/WEB-INF/templates/"/>
+							<!-- 视图后缀 -->
+							<property name="suffix" value=".html"/>
+							<property name="templateMode" value="HTML5"/>
+							<property name="characterEncoding" value="UTF-8"/>
+							<property name="cacheable" value="false"/>
+						</bean>
+					</property>
+				</bean>
+			</property>
+		</bean>
+	
+	在扫描的包下使用 @Controller 定义控制器。对其方法使用 @RequestMapping 声明访问路径，thymeleaf_prefix+return_string+thymeleaf_suffix 为对应的视图文件（例如html）
+
+
+	SpringMVC.xml 配置项：
+		<mvc:default-servlet-handler/> 开启默认 servlet。对于 DispatcherServlet 处理不了的映射，交给默认映射。
+			如果需要使用静态资源（js, css），需要配置该项。
+	
+
+	@RequestMapping：
+		可用在类和方法上
+		参数：
+			value：路径，可为字符串数组，满足任意一个就行
+			method: 限制请求的方法，比如 RequestMethod.GET
+			param: 限制请求附带的参数，比如用param={"username=hcp"}允许类似于 /a?username=hcp 的请求
+				如果规定了多个 param，必须同时满足
+			header：限制请求头
+	@PathVariable:
+		用于提取路径中的占位符
+		例如：
+			@RequestMapping("/testRest/{id}/{username}")
+			public String testRest(@PathVariable("id") String id, @PathVariable("username") String username){
+				System.out.println("id:"+id+",username:"+username);
+				return "success";
+			}		
+	获取请求中的数据：都是用在 @Controller 类的方法的形参上
+		@RequestParam: 获取 request 中的 parameter
+		@RequestHeader: 获取请求头中的数据
+		@CookieValue : 获取 cookie 的数据
+			例如：
+				// 注意：对于User类，会使用同名的 parameter 进行填充
+				@RequestMapping(value = "/getvalue")
+				public String list7(
+						HttpServletRequest request,
+						String username,
+						@RequestParam(value = "id", required = false, defaultValue = "123") int id,
+						@RequestHeader(value = "host") String host,
+						@CookieValue(value = "JSESSIONID", required = false) String sid,
+						User user
+				) {	
+					return "home";
+				}	
+controller 类的方法中获取和填充数据：
+	获取数据：
+		1. 获取request范围的数据
+			parameter
+				同名形参
+				@RequestParam 修饰形参
+			header
+				@RequestHeader 修饰形参
+			cookie
+				@CookieValue 修饰形参
+			attribute		
+				声明 HttpServletRequest 类型形参，再 request.getAttribute 获取属性
+		2. 获取 session 范围的数据
+			声明 HttpSession 类型形参，再 session.getAttribute
+		3. 获取 context/application 范围的数据
+			声明 HttpServletRequest 类型形参，再 request.getServletContext().getAttribute
+	填充数据：
+		1. 填充 request 范围的数据
+			声明 HttpServletRequest 类型形参，再 request.setAttribute
+			声明 Model/ModelAndView/Map<String, Object> 类型数据，再调用 setAttribute 或者 addAttribute
+			使用 ModelAndView:
+				@RequestMapping("/modelAndView")
+				public ModelAndView modelAndView() {
+					ModelAndView modelAndView = new ModelAndView();
+					modelAndView.addObject("xcc", "是小屁屁呀");
+					modelAndView.setViewName("home");
+					return modelAndView;
+				}
+		2. 填充 session 范围的数据
+			声明 HttpSession 类型形参，再 session.setAttribute
+		3. 填充 context/application 范围的数据
+			声明 HttpServletRequest 类型形参，再 request.getServletContext().setAttribute
+Restful 接口：	
+	对于 create update delete read （增改删查）分别用http 的不同协议来表示：
+		create post
+		update put
+		delete delete
+		read get
+	例如：
+		 read all: /user get
+		 read by info: /user/1 get
+		 delete by info: /user/1 delete
+		 create: /user post
+		 update: /user put
+	而浏览器一般只能发送 get 与 post 请求：
+		超链接 <a>  get 请求
+		表单 <form> 的 method 可以为 get 或者 post
+	SpringMVC 提供了一个 HiddenHttpMethodFilter， 可以根据 post 请求附带的 _param 参数修改 http 请求为 delete 或者 put
+	
+	使用 @PathVariable 的形参标注可以便捷获取 url 中的信息，可以与 Restful 风格配合使用
+		
+HttpMessageConverter 报文信息转换器：
+	@RequestBody: 标识形参。用于获取请求体。不常用
+	RequestEntity：形参。用于将请求封装为类，有一些便捷方法获取请求头等。不常用
+	@ResponseBody：方法的注解。对应的方法的返回值会被直接写入 response 中，而不会交给视图解析器。
+		如果返回值是对象，可以被自动转为 JSON 格式的字符串。
+		response 的 Content-type: application/json;charset=UTF-8
+		需要添加依赖：
+			<dependency>
+			  <groupId>com.fasterxml.jackson.core</groupId>
+			  <artifactId>jackson-databind</artifactId>
+			  <version>2.12.1</version>
+			</dependency>		
+	ResponseEntity: 用于方法的返回值。通过该类型设置返回数据的 body, header, statusCode。实现文件下载时可以使用该类型作为返回值
+	
+拦截器 Intercepor：
+	用于在 DispatcherServlet 调用 Controller 的前后进行处理
+	自定义的 Intercepor 需要继承 HandlerInterceptor，实现它的三个方法：
+		preHandle
+		postHandle
+		afterCompletion
+	
+	SpringMVC.xml 配置：
+		<mvc:interceptors>
+			<bean class="com.hcp.interceptor.First"></bean>			
+			<ref bean="interceporName"></ref>
+			<mvc:interceptor>
+				<mvc:mapping path="/b/**"/>
+				<mvc:exclude-mapping path="/"/>
+				<bean class="com.hcp.interceptor.Second"></bean>
+			</mvc:interceptor>
+		</mvc:interceptors>
+		
+	关于 Intercepor 调用的源码：
+		DispatcherServlet.doDispatch 方法中的：
+			mappedHandler.applyPreHandle 调用
+			mappedHandler.applyPostHandle 调用
+			triggerAfterCompletion 调用中的 mappedHandler.triggerAfterCompletion 调用
+			
+			
+异常处理器：
+	可以使用 Spring MVC 自带的异常处理器配置出现异常时调整到的页面
+		对应使用的异常处理器类为 SimpleMappingExceptionResolver
+		
+SpringMVC的 java 配置：
+	初始化类：AbstractAnnotationConfigDispatcherServletInitializer 
+		方法：
+			getRootConfigClasses：返回与 servlet 无关的 bean 的配置类
+			getServletConfigClasses: 返回与 servlet 有关的 bean 的配置类
+			getServletMappings: 设置 ServletContext 对应的路径，作为整个 web 项目的 path
+			
+	WebInit 类：
+		public class WebInit extends AbstractAnnotationConfigDispatcherServletInitializer {
+			@Override
+			protected Class<?>[] getRootConfigClasses() {
+				return new Class[]{RootConfig.class};
+			}
+
+			@Override
+			protected Class<?>[] getServletConfigClasses() {
+				return new Class[]{WebConfig.class};
+			}
+
+			@Override
+			protected String[] getServletMappings() {
+				return new String[]{"/"};
+			}
+
+			@Override
+			protected Filter[] getServletFilters() {
+				CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+				characterEncodingFilter.setEncoding("utf-8");
+				characterEncodingFilter.setForceEncoding(true);
+
+				HiddenHttpMethodFilter hiddenHttpMethodFilter = new HiddenHttpMethodFilter();
+
+				return new Filter[]{characterEncodingFilter, hiddenHttpMethodFilter};
+			}
+		}		
+		
+	WebConfig 类：
+		@Configuration
+		@ComponentScan("com.hcp.controller")
+		@EnableWebMvc // 如果要使用 addViewControllers 等方法，必须要添加
+		public class WebConfig implements WebMvcConfigurer {
+			@Bean
+			public SpringResourceTemplateResolver templateResolver() {
+				SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
+				resolver.setPrefix("/WEB-INF/templates/");
+				resolver.setSuffix(".html");
+				resolver.setTemplateMode("HTML5");
+				resolver.setCharacterEncoding("utf-8");
+				resolver.setCacheable(false);
+				return resolver;
+			}
+
+			@Bean
+			public SpringTemplateEngine templateEngine(SpringResourceTemplateResolver templateResolver) {
+				SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+				templateEngine.setTemplateResolver(templateResolver);
+				return templateEngine;
+			}
+
+			@Bean
+			public ThymeleafViewResolver viewResolver(SpringTemplateEngine templateEngine) {
+				ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+				viewResolver.setOrder(1);
+				viewResolver.setCharacterEncoding("utf-8");
+				viewResolver.setTemplateEngine(templateEngine);
+				return viewResolver;
+			}
+
+			@Override
+			public void addViewControllers(ViewControllerRegistry registry) {
+				registry.addViewController("/home").setViewName("/home");
+			}
+		}	
+
+	RootConfig 类：
+		@Configuration
+		@ComponentScan("com.hcp.dao")
+		public class RootConfig {
+		}	
+	
+Spring MVC 源码：
+	DispatcherServlet 的源头是 Servlet。
+		Servlet (javax.servlet)
+			GenericServlet (javax.servlet)
+				HttpServlet (javax.servlet.http)
+					HttpServletBean (org.springframework.web.servlet)
+						FrameworkServlet (org.springframework.web.servlet)
+							DispatcherServlet (org.springframework.web.servlet)
+
+	
+	
+	初始化：
+		Servlet.init(ServletConfig)
+			GenericServlet.init(ServletConfig)
+			GenericServlet.init()
+					HttpServletBean.init()
+					HttpServletBean.initServletBean()
+						FrameworkServlet.initServletBean()
+						FrameworkServlet.initWebApplicationContext()
+						FrameworkServlet.onRefresh(ApplicationContext)
+							DispatcherServlet.onRefresh(ApplicationContext)
+							DispatcherServlet.initStrategies(ApplicationContext context){
+								initMultipartResolver(context);
+								initLocaleResolver(context);
+								initThemeResolver(context);
+								initHandlerMappings(context);
+								initHandlerAdapters(context);
+								initHandlerExceptionResolvers(context);
+								initRequestToViewNameTranslator(context);
+								initViewResolvers(context);
+								initFlashMapManager(context);
+							}								
+		
+	执行请求：
+		Servlet.service(ServletRequest, ServletResponse)
+			GenericServlet.service(ServletRequest, ServletResponse)
+				HttpServlet.service(ServletRequest, ServletResponse)
+				HttpServlet.service(HttpServletRequest, HttpServletResponse)
+				HttpServlet.doGet(HttpServletRequest, HttpServletResponse)
+				HttpServlet.doPost(HttpServletRequest, HttpServletResponse)
+				HttpServlet.doPut(HttpServletRequest, HttpServletResponse)
+				HttpServlet.doDelete(HttpServletRequest, HttpServletResponse)
+						FrameworkServlet.service(HttpServletRequest, HttpServletResponse)
+						FrameworkServlet.processRequest(HttpServletRequest, HttpServletResponse)
+						FrameworkServlet.doService(HttpServletRequest, HttpServletResponse)
+							DispatcherServlet.doService(HttpServletRequest, HttpServletResponse)
+							DispatcherServlet.doDispatch(HttpServletRequest, HttpServletResponse){
+								mappedHandler.applyPreHandle(processedRequest, response) // 调用拦截器的 preHandle 方法									
+								mv = ha.handle(processedRequest, response, mappedHandler.getHandler()); // 调用自定义的 Controller 对应的方法
+								mappedHandler.applyPostHandle(processedRequest, response, mv); // 调用拦截器的 postHandle 方法
+								processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+									mappedHandler.triggerAfterCompletion(request, response, null); // 调用拦截器的 afterCompletion 方法
+							}
+		
+		
+MyBatis:	
+	需要的文件：
+		mybatis 全局配置文件：指定连接池，事务管理器，mapper的xml文件
+		xxxMapper.xml：写 sql 的文件
+		xxxMapper.java: 接口文件
+		
+		实体类
+	
+	内容：mybatis-config.xml引入属性文件、配置文件的配置项、配置文件中的mapper的多种引入方式（mapper+class, mapper+resource, mapper+url, package）、mapper配置文件（update, delete, update, select, 获取自增主键的值）、SqlSession提交
+	
+	mapper.xml:
+		insert
+		delete
+		update
+		select: 传入多个参数时通过 Map 或者 @Param 设定 key。如果是PJPO元素，直接使用属性值作为key，获取集合
+		
+		#{key} 与 ${key} 区别
+		
+		结果映射:
+			resultType: 指定类名
+			resultMap: 指定自己定义的resultMap
+				resultMap: id, resource, association(将查询到的值映射到类中，可以配合设置延迟加载)
+				填充主键: id(column, property)
+				填充普通属性: result(column, property)
+				填充列表属性: 
+					collection(ofType, property)
+					collection(property, select, column) 分步查询
+				填充类属性: 
+					result(column, property(a.b))
+					association(javaType, property):
+						填充主键: id(column, property)
+						填充普通属性: result(column, property)
+					association(property, select, column) 分步调用其它的sql语句
+					
+				分步查询传递多个值：
+					column="{key1=column1,key2=column2}"
+						
+				
+				
+		
+	注解：
+		@Param: 指定参数的名字
+		@MapKey: 指定map的key。在使用查询得到多个关系创建map时需要使用。
+		
+	
+	动态SQL：
+		可以使用一些标签动态生成 SQL 语句
+			if
+			choose (when, otherwise)
+			trim (where, set)
+			foreach
+		OGNL 表达式：
+	有关 mapper.xml 的其它标签:
+		bind: 可以实现 将 "'%'+variable+'%'" 生成一个 ?
+		sql: 为 sql 代码取别名
+		
+		
+	缓存:
+		一级缓存是 SqlSession 级别的。每个 SqlSession 都保存了一个缓存。
+		二级缓存是 mapper 级别的。在 mapper.xml 的mapper下开启<cache/>标签
+		可以整合第三方缓存包
+		
+	事务：
+		1. 手动提交（默认）
+			手动调用 SqlSession.commit();
+		2. 自动提交
+			sqlSessionFactory.openSession(true)
+			
+		
+	MyBatis 视频 https://www.bilibili.com/video/BV1mW411M737?p=61&spm_id_from=pageDriver 之后在讲将 MyBatis+Spring+Spring MVC 整合。因为我不了解 Spring MVC，所以打算先学一下 Spring MVC				
+	
+
+	
+SSM整合 Spring + Spring MVC + Mybatis:
+	参考网址：https://programming.vip/docs/ssm-spring-spring-mvc-mybatis-integration.html
+	配置文件：
+		web.xml
+		spring-mvc.xml
+		spring.xml
+		
+		log4j2.xml
+		----
+		web.xml:
+			<!DOCTYPE web-app PUBLIC
+					"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+					"http://java.sun.com/dtd/web-app_2_3.dtd" >
+			<web-app>
+				<display-name>Archetype Created Web Application</display-name>
+				<!--  指定 Spring 的配置文件  -->
+				<context-param>
+					<param-name>contextConfigLocation</param-name>
+					<param-value>classpath:spring.xml</param-value>
+				</context-param>
+
+				<filter>
+					<filter-name>CharacterEncodingFilter</filter-name>
+					<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+					<init-param>
+						<param-name>encoding</param-name>
+						<param-value>utf-8</param-value>
+					</init-param>
+				</filter>
+				<filter-mapping>
+					<filter-name>CharacterEncodingFilter</filter-name>
+					<url-pattern>/*</url-pattern>
+				</filter-mapping>
+
+				<listener>
+					<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+				</listener>
+
+				<servlet>
+					<servlet-name>DispatcherServlet</servlet-name>
+					<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+					<!--  指定 SpringMVC 的配置文件  -->
+					<init-param>
+						<param-name>contextConfigLocation</param-name>
+						<param-value>classpath:spring-mvc.xml</param-value>
+					</init-param>
+					<load-on-startup>1</load-on-startup>
+				</servlet>
+				<servlet-mapping>
+					<servlet-name>DispatcherServlet</servlet-name>
+					<url-pattern>/</url-pattern>
+				</servlet-mapping>
+			</web-app>
+		----
+		spring-mvc.xml：
+			<?xml version="1.0" encoding="UTF-8"?>
+			<beans xmlns="http://www.springframework.org/schema/beans"
+				   xmlns:mvc="http://www.springframework.org/schema/mvc"
+				   xmlns:context="http://www.springframework.org/schema/context"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.springframework.org/schema/beans
+				   http://www.springframework.org/schema/beans/spring-beans.xsd
+				   http://www.springframework.org/schema/mvc
+				   http://www.springframework.org/schema/mvc/spring-mvc.xsd
+				   http://www.springframework.org/schema/context
+				   http://www.springframework.org/schema/context/spring-context.xsd">
+				<!--  指定 SpringMVC 容器扫描的位置  -->
+				<context:component-scan base-package="com.hcp">
+					<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+				</context:component-scan>
+
+
+				<!-- 配置Thymeleaf视图解析器 -->
+				<bean id="viewResolver"
+					  class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+					<property name="order" value="1"/>
+					<property name="characterEncoding" value="UTF-8"/>
+					<property name="templateEngine">
+						<bean class="org.thymeleaf.spring5.SpringTemplateEngine">
+							<property name="templateResolver">
+								<bean class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+									<!-- 视图前缀 -->
+									<property name="prefix" value="/WEB-INF/templates/"/>
+									<!-- 视图后缀 -->
+									<property name="suffix" value=".html"/>
+									<property name="templateMode" value="HTML5"/>
+									<property name="characterEncoding" value="UTF-8"/>
+									<property name="cacheable" value="false"/>
+								</bean>
+							</property>
+						</bean>
+					</property>
+				</bean>
+				
+			<!--  <mvc:resources mapping="/js" location="/js/**"/>  -->
+				<mvc:annotation-driven/>
+
+			</beans>		
+		----
+		spring.xml：
+			<?xml version="1.0" encoding="UTF-8"?>
+			<beans xmlns="http://www.springframework.org/schema/beans"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xmlns:context="http://www.springframework.org/schema/context"
+				   xmlns:aop="http://www.springframework.org/schema/aop"
+				   xmlns:tx="http://www.springframework.org/schema/tx"
+				   xsi:schemaLocation="http://www.springframework.org/schema/beans
+				http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/context
+				http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/aop
+				http://www.springframework.org/schema/aop/spring-aop.xsd
+				http://www.springframework.org/schema/tx
+				http://www.springframework.org/schema/tx/spring-tx.xsd">
+				<!--  指定 Spring 容器扫描的位置  -->
+				<context:component-scan base-package="com.hcp">
+					<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+				</context:component-scan>
+
+				<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+					<property name="dataSource" ref="dataSource"/>
+				</bean>
+				<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+					<!-- 基本属性 url、user、password -->
+					<property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+					<property name="url" value="jdbc:mysql://10.12.41.111:13306/java"/>
+					<property name="username" value="root"/>
+					<property name="password" value="123456"/>
+				</bean>
+
+				<!--  指定 Mybatis 扫描的位置  -->
+				<bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+					<property name="basePackage" value="com.hcp.dao"/>
+				</bean>
+			</beans>		
+		----
+		
+	部分 Maven 依赖：
+        <spring.version>5.0.2.RELEASE</spring.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <log4j.version>2.14.0</log4j.version>
+        <mysql.version>8.0.16</mysql.version>
+        <mybatis.version>3.4.5</mybatis.version>	
+        <mybatis.spring.version>1.3.0</mybatis.spring.version>	
+        <thymeleaf.spring.version>3.0.12.RELEASE</thymeleaf.spring.version>	
+			
+		
+	测试：
+		单独测试 Spring
+		单独测试 Mybatis
+		
+Mybatis Generator （MBG）:
+	根据数据表自动生成 mybatis 的 实体类和 mapper 文件：
+		1. 写配置文件
+			数据库连接信息
+			实体类、mapper的生成位置和包名
+			数据表的名字和实体类名字
+		2. 运行 generator:
+			命令行运行
+			或者 java 代码运行
+			
+	出错了
+	
+Mybatis 的 PageHelper 插件：
+	github地址（使用文档）：https://github.com/pagehelper/Mybatis-PageHelper/blob/master/wikis/en/HowToUse.md
+	1. maven 依赖
+	2. mybatis 配置文件中添加插件对应的配置：
+		// 在配置文件（如  mybatis-config.xml）中的 environments 标签之前添加如下配置
+		<plugins>
+			<plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+		</plugins>	
+	3. 程序中使用：
+		// 设置查询第5页，并设置每页的记录数为3
+		Page<Object> page = PageHelper.startPage(5, 3); // 使用该语句后，之后的一条查询语句会被修改为查询页。
+		List<User> users = mapper.getAllUsers(); // 查询
+		// 使用 page 获取一些信息
+		System.out.println("总记录数：" + page.getTotal());
+		System.out.println("总页码：" + page.getPages());
+		System.out.println("当前页码：" + page.getPageNum());
+		System.out.println("每页的记录数：" + page.getPageSize());
+		PageInfo<User> info = new PageInfo<>(users, 5);
+		for (int num : info.getNavigatepageNums()) {
+			System.out.println("相邻页：" + num);
+		}	
+        
+SpringBoot: 
+	尚硅谷文档：
+		https://www.yuque.com/atguigu/springboot
+	按照maven配置pom.xml的方式运行：
+		1.设置 parent 标签
+			<parent>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-parent</artifactId>
+				<version>2.6.2</version>
+			</parent>		
+		2.设置 dependencies 标签
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-web</artifactId>
+				</dependency>
+			</dependencies>
+		3. (可选) 设置打包方式
+			<packaging>jar</packaging>
+		4. (可选) 添加 SpringBoot的打包插件
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		5. 主程序 
+			@SpringBootApplication
+			public class MainApplication {
+				public static void main(String[] args) {
+					SpringApplication.run(MainApplication.class, args);
+				}
+			}	
+		6. request的处理器
+			@RestController
+			public class HelloHandle {
+				@RequestMapping("/hello")
+				public String handle01() {
+					return "hello world! 狗子屁，棒棒哒。";
+				}
+			}		
+		7. (可选) 设置 SpringBoot 的配置文件 application.properties
+			server.port=18080
+		8. IDEA 中运行
+			运行主程序 MainApplication
+		9. 打包成 jar 包再用命令行运行
+			IDEA 的右侧 maven 标签中，双击 lifecycle -> package
+			打包结果在 target 文件夹下，名为 xxx.jar
+			使用 java -jar xxx.jar 运行 jar 包
+	
+	pom.xml 说明：
+		parent 一般定义了一些 property, 用于声明一些依赖的版本
+		
+			
+	SpringBoot 官方文档：
+		Dependency Versions 中写了所有依赖的版本
+			如果想要修改依赖的版本，先找到依赖jar对应的属性名，然后在 pom.xml 中设置该属性的值，比如：
+				<properties>
+					<mysql.version>8.0.27</mysql.version>
+				</properties>			
+		Application Properties 中写了所有可配置的属性：
+			debug=true 输入 debug 信息
+			server.port=8888 设置 http 端口号
+		Using Spring Boot 给出了一些 spring-boot-starter
+			
+	一些注解：
+		@SpringBootApplication 注释程序的主类，可以使用 scanBasePackages 指定扫描的包。
+		@Component 等注册 bean 的注解依旧可以使用
+		@Configuration、@Bean 用于注册 bean
+			@Configuration中的 proxyBeanMethods 属性指定了代理bean的方法。
+				true：bean 方法返回的对象是单实例的
+				false：bean 方法返回的对象不是单实例的
+		@Import 通过类名注册 bean
+		@Conditional 用于修饰 bean，限制 bean 生成的条件。有一系列子注释
+			@ConditionalOnBean 如果存在某种类型（或者名字）的 bean，就生成被修饰的 bean
+		@ConfigurationProperties 使用 application.properties 中的属性配置 bean 的属性。如：
+			@Repository("user01")	
+			@ConfigurationProperties("user01") // 使用 application.properties 中前缀为 user01 的内容填充类的属性值
+			public class User {}
+		@EnableConfigurationProperties 指定一些类名，被这些注解 @ConfigurationProperties 类生效，自动生成 bean. 而不需要对这些类添加 bean 注解。该类似乎挺多余的。
+                
+	在启动时执行代码的一些方法：
+		1. 使用 ServletContextListener，在容器创建后执行代码
+		2. @PostConstruct：修饰类的方法（只允许一个），该方法会在类的依赖被注入后执行。
+				
+	Lombok 插件：
+		可以自动生成一些 bean 的代码：						
+			@ToString
+			@Data 生成所有 field 的 getter、setter 方法
+			@EqualsAndHashCode 生成 equals、hashCode 方法
+			@Slf4j 生成 log 变量，用于记录日志
+			@NoArgsConstructor
+			@AllArgsConstructor
+		安装：
+			1. maven 依赖
+				<dependency>
+					<groupId>org.projectlombok</groupId>
+					<artifactId>lombok</artifactId>
+				</dependency>			
+			2. IDEA 的 Lombok plugin
+			
+	SpringBoot devtools 依赖：	
+		可以使得修改代码后按 CTRL+F9 快速更新服务器
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-devtools</artifactId>
+				<optional>true</optional>
+			</dependency>
+		由于我的电脑之前为了安装 latex，修改了 windows TEMP 相关的环境变量，使得 devtools 会报错
+			Temp directory 'C:\Windows\TEMP' does not exist
+			
+	Spring Initailizr:
+		简化了创建 SpringBoot 工程。只需要设置项目名，勾选使用的场景，就可以创建新的工程
+	yaml 配置文件：	
+		SpringBoot 支持 properties 与 yaml 配置文件，文件名为 application.xxx。允许同时存在多个配置文件，但是有优先级
+		yaml 语法：
+			key: value
+			list1: [value1, value2, value3]
+			list2:
+				- v1
+				- v2
+				- v3
+			dict1: {k1:v1, k2:v2, k3:v3}
+			dict2:
+				k1: v1
+				k2: v2
+				k3: v3
+		使用下列依赖后，在 yaml 写自定义类的配置时，可以自动提示（可能需要重新运行程序）：
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-configuration-processor</artifactId>
+				<optional>true</optional>
+			</dependency>
+		yaml 中输入字符串：
+			可以不写引号
+			单引号 'hello \n world' 可以输入字符串"\n"
+			双引号 'hello \n world' 会输出换行符
+			
+	SpringBoot 访问静态资源：
+		只要静态资源放在类路径下： called /static (or /public or /resources or /META-INF/resources
+		可以修改默认的静态资源访问路径：
+			spring.mvc.static-path-pattern=/res/**		
+		有时候，新建的 SpringBoot web Initailizr 项目也访问不了静态资源，删除 target 文件夹，重新启动试一下
+	获取 request 的数据：
+		与SpringMVC相同：
+			获取 request 的信息：
+				parameter
+					同名形参
+					@RequestParam 修饰形参
+				header
+					@RequestHeader 修饰形参
+				cookie
+					@CookieValue 修饰形参
+				url 信息：
+					@PathVariable
+				request body:
+					@RequestBody
+			返回一些信息：
+				返回信息给视图：
+					@ModelAttribute
+		例子：
+			@Controller
+			public class Info {
+				@ResponseBody
+				@GetMapping("/info/{id}/user/{date}")
+				public Map info(@RequestParam("name") String name,
+								   @RequestParam("age") int age,
+								   @RequestParam Map<String, String> requestParams,
+								   @RequestHeader("host") String host,
+								   @RequestHeader Map<String, String> requestHeaders,
+								   @PathVariable("id") String userId,
+								   @PathVariable Map<String, String> pathVariable,
+								   @CookieValue("Pycharm-33a55bc6") String cookieValue,
+								   @CookieValue("Pycharm-33a55bc6") Cookie cookie) {
+					HashMap<String, Object> map = new HashMap<>();
+					map.put("name", name);
+					map.put("age", age);
+					map.put("host", host);
+					map.put("userId", userId);
+					map.put("cookieValue", cookieValue);
+
+					map.put("requestParams", requestParams);
+					map.put("requestHeaders", requestHeaders);
+					map.put("pathVariable", pathVariable);
+					map.put("cookieNameValue", cookie.getName() + ":" + cookie.getValue());
+					return map;
+				}
+	返回：
+		使用 @ResponseBody 注解后，controller 的方法的返回值支持 class，会被自动转为 json 返回
+		
+		
+	@MatrixVariable：一种特殊的在 url 中传递键值对的方式
+		如 url: /mat/boss1;age=40/emp1;age=20/lName;lastName=cp/fName;firstName=h
+			在url中间，使用 ; 后接键值对
+			而不是在 url 末尾使用 ? 接键值对: /mat/boss?age=40&name=gzp
+		例子：		
+			// url: /mat/boss1;age=40/emp1;age=20/lName;lastName=cp/fName;firstName=h
+			@ResponseBody
+			@GetMapping("/mat/{boss}/{employee}/{lname}/{fname}")
+			public Map mat(@MatrixVariable(pathVar = "boss", name = "age") Integer bossAge,
+						   @MatrixVariable(pathVar = "employee", name = "age") Integer empAge,
+						   @MatrixVariable("lastName") String lastName,
+						   @MatrixVariable("firstName") String firstName) {
+
+				HashMap<String, Object> map = new HashMap<>();
+				map.put("bossAge", bossAge);
+				map.put("empAge", empAge);
+				map.put("lastName", lastName);
+				map.put("firstName", firstName);
+				return map;
+			}	
+		开启：实现 WebMvcConfigurer 接口，重写 configurePathMatch 方法
+			@Configuration
+			public class AppConfig implements WebMvcConfigurer {
+				@Override
+				public void configurePathMatch(PathMatchConfigurer configurer) {
+					UrlPathHelper urlPathHelper = new UrlPathHelper();
+					urlPathHelper.setRemoveSemicolonContent(false);
+					configurer.setUrlPathHelper(urlPathHelper);
+				}
+			}		
+	themeleaf:
+		需要引入相关的 starter：
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-thymeleaf</artifactId>
+			</dependency>		
+		默认前缀是 /templates/，默认后缀是 .html
+		themeleaf 的内容参考本文档之前学 themeleaf 的笔记
+		SpringBoot 默认不能访问 templates/ 下的资源，需要写 controler 将 url 映射到模板文件 
+		
+		
+			
+	添加拦截器：
+		1. 实现 HandlerInterceptor 接口
+			public class LoginInterceptor implements HandlerInterceptor {...}
+		2. 在 WebMvcConfigurer 的实现类中 重写 addInterceptors 方法
+			@Override
+			public void addInterceptors(InterceptorRegistry registry) {
+				registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**").excludePathPatterns("/res/**");
+			}		
+	文件上传：
+		html端：
+			<form action="/uploadSingle" enctype="multipart/form-data" method="post">
+				单个文件：<input type="file" name="singleFile">
+				<input type="submit">
+			</form>
+			<br>
+			<form action="/uploadMulti" enctype="multipart/form-data" method="post">
+				多个文件：<input type="file" name="multiFile" multiple>
+				<input type="submit">
+			</form>			
+		服务器端：
+			单个文件： 
+				public String upload(@RequestParam("singleFile") MultipartFile file) {}
+			多个文件：
+				public String upload(@RequestParam("multiFile") MultipartFile[] files) {}
+		配置可上传的文件大小：（对应类 MultipartProperties）
+			spring.servlet.multipart.max-request-size=1000MB
+			spring.servlet.multipart.max-file-size=1000MB
+			
+	SpringBoot 错误页面
+		寻找位置：
+			当使用了模板引擎时：
+				在 templates/error 下寻找
+			当未使用模板引擎时:
+				在 static/error 下寻找
+			
+			404 错误时的寻找优先级：
+				templates/error/404.html 
+				static/error/404.html 
+				templates/error/4xx.html 
+				static/error/4xx.html 
+				SpringBoot 的 WhiteBoard 页面		
+		对于非浏览器端：
+			返回 json，key 为如下几个:
+				timestamps, status, error, message, path
+		对于浏览器端：
+			将 json 渲染为 html 页面
+		themyleaf 中可以使用 json 中的这几个 key（${key}）
+	添加Servlet 的原生 Servlet, Filter, Listener:
+		1. 实现对应的类
+			public class MyServlet extends javax.servlet.http.HttpServlet
+			public class MyFilter implements javax.servlet.Filter
+			public class MyListener implements javax.servlet.ServletContextListener
+		2. 注册到SpringBoot中
+			方法一： 使用注解
+				（1）使用 @WebServlet("/servletPath"), @WebFilter("/urlPatter/*"), @WebListener 分别修饰子类
+				（2）在 主类 或者 配置类上使用 @ServletComponentScan("com.path") 开启 Servlet 组件的扫描
+			方法二：在 config 类中注册对应的 xxxRegistrationBean
+				@Bean
+				public FilterRegistrationBean<Filter> addFilter() {
+					FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
+					filterRegistrationBean.setFilter(new MyFilter());
+					filterRegistrationBean.addUrlPatterns("/res/*");
+					return filterRegistrationBean;
+				}
+
+				@Bean
+				public ServletRegistrationBean<Servlet> addServlet() {
+					ServletRegistrationBean<Servlet> registrationBean = new ServletRegistrationBean<>();
+					registrationBean.setServlet(new MyServlet());
+					registrationBean.addUrlMappings("/res/servlet");
+					return registrationBean;
+				}
+
+				@Bean
+				public ServletListenerRegistrationBean<ServletContextListener> addListener(){
+					ServletListenerRegistrationBean<ServletContextListener> registrationBean = new ServletListenerRegistrationBean<>();
+					registrationBean.setListener(new MyListener());
+					return registrationBean;
+				}			
+				
+	Listener, Filter, HandlerInterceptor 的区别：
+		Listener: 
+			Servlet包提供的。监测 Context, Servlet, Request, Response 等被创建或者销毁的时刻
+		Filter: 
+			Servlet包提供的。在执行Servlet之前或之后执行。
+			可修改 resquest、response 的内容
+		HandlerInterceptor: 
+			SpringMVC框架带的功能。利用切片实现。可以在Servlet执行之前、之后、完成时执行。
+			只控制是否放行。
+		
+		执行顺序：
+			Filter前处理 --> Interceptor前处理 --> controller--> Interceptor后处理 --> Filter后处理
+	
+	定制化 SpringBoot 的方式：
+		1. 使用不同的 starter
+			例如：配置 web, thymeleaf, mysql 场景
+		2. 修改配置文件
+			例如：修改 http 端口号，服务器允许上传的文件大小
+		3. 注册 bean
+			例如：添加 servlet 包的原生 Servlet, Filter, Listener
+		4. 实现 WebMvcConfigurer 的子配置类，用 @Configuration 标注
+			如果使用 @EnableWebMvc 修饰 WebMvcConfigurer 子类，
+				表示自己写的子类全面接管 WebMvc 的配置，
+				会导致 SpringBoot 的 WebMvcAutoConfiguration 失效
+			例如：添加 HandlerInterceptor
+			
+	连接 mysql 数据库：
+		一个奇怪的 bug：当连接远程服务器，而配置的 username 或者 password 错误时，错误提示是 
+			Access denied for user 'root'@'本机IP地址' (using password: YES)
+			
+		1. 添加 jdbc，mysql，druid 依赖
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-jdbc</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>1.1.17</version>
+			</dependency>
+		2. 配置数据库的 url, username, password
+			spring.datasource.username=root
+			spring.datasource.password=123456
+			spring.datasource.url=jdbc:mysql://10.12.41.169:13306/java
+		
+		Driud 连接池：
+			带有监控功能
+			使用 starter 时，只需要在配置文件中配置一下，就可以监控，从而访问网页，查看服务器的访问情况（特别是关于数据库的） 
+			配置：
+				# 添加插件: stat 统计功能
+				spring.datasource.druid.filters=stat
+				# 开启统计功能
+				spring.datasource.druid.web-stat-filter.enabled=true
+				# 开启监控页面的 servlet (通过 /druid 路径访问)
+				spring.datasource.druid.stat-view-servlet.enabled=true
+	整合 mybatis:
+		1. 导入 mybatis 对应的 starter
+			<dependency>
+				<groupId>org.mybatis.spring.boot</groupId>
+				<artifactId>mybatis-spring-boot-starter</artifactId>
+				<version>2.1.3</version>
+			</dependency>
+		2. 在 SpringBoot 的配置文件中指定 mapper 的位置：
+			mybatis:
+				mapper-locations: classpath:mapper/*.xml
+		3. 声明 mapper 的接口，用 @Mapper 修饰
+			@Mapper
+			public interface UserMapper {
+				@Select("select * from user")
+				List<User> queryAllUsers();
+
+				@Select("select * from user where age=#{age}")
+				List<User> queryUsersByAge(Integer age);
+			}
+		4. 使用 mapper:
+		    @Autowired
+			UserMapper userMapper;
+
+			@GetMapping("users")
+			public List<User> getUsers() {
+				return userMapper.queryAllUsers();
+			}
+		5. 对于复杂的 mapper 方法，可以使用 xxxMapper.xml 进行配置
+			<?xml version="1.0" encoding="UTF-8" ?>
+			<!DOCTYPE mapper
+					PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+			<mapper namespace="com.example.springbootinitializr.mapper.UserMapper">
+				<!--    public Account getAcct(Long id); -->
+				<!--    <select id="queryAllUsers" resultType="com.atguigu.admin.bean.Account">-->
+				<!--        select * from  account_tbl where  id=#{id}-->
+				<!--    </select>-->
+				<update id="addUser" parameterType="com.example.springbootinitializr.bean.User"
+						keyProperty="id" useGeneratedKeys="true">
+					insert into user(age, name)
+					values (#{age}, #{name})
+				</update>
+			</mapper>		
+		6. 如果需要写 mybatis 的全局配置，可以直接在 SpringBoot 的配置文件中写入 mybatis.configuration 的对应值：
+			mybatis:
+			  configuration:
+				map-underscore-to-camel-case: true			
+	整合 mybatis-plus: 
+		mybatis-plus 会自动扫描被 @Mapper 修饰的类
+		简单使用：
+			1. 添加 starter
+				<dependency>
+					<groupId>com.baomidou</groupId>
+					<artifactId>mybatis-plus-boot-starter</artifactId>
+					<version>3.4.1</version>
+				</dependency>
+			2. 写 Mapper 接口，直接扩展 BaseMapper 后就有了 crud 能力。
+				使用 @Mapper 注解修饰 mapper 类，或者使用 @MapperScan("com...mapper") 指定被扫描的包
+				@Mapper
+				public interface UserMapper extends BaseMapper<User> {}
+			3. 使用 mapper:
+				@Autowired
+				UserMapper userMapper;
+
+				@GetMapping("users")
+				public List<User> getUsers() {
+					return userMapper.selectList(null);
+				}		
+		一些注解：
+			@TableField(exist = false) 指定某个类的属性不在数据表中
+				@TableField(exist = false)
+				private String address;
+				
+		使用 mabatis-plus 简化 service 代码：
+			接口：
+				public interface UserService extends IService<User> {}
+			实现类：
+				@Service
+				public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {}
+	整合 redis:
+		简单使用:
+			1. 导入 starter
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-redis</artifactId>
+				</dependency>
+			2. 配置 host, password 等
+				spring:
+				  redis:
+					host: 10.12.41.169
+					password: redis			
+			3. 使用 RedisTemplate 进行操作
+				@Autowired
+				StringRedisTemplate redisTemplate;
+
+				@GetMapping("/info")
+				public String getUsers() {
+					ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+					String value = opsForValue.get("k1");
+					return "访问成功: " + value;
+				}
+		注意事项：
+			redis starter 默认使用 lettuce 客户端
+			如果需要切换为 jedis 客户端，需要先导入 jedis 的依赖，再设置 spring.redis.client-type=jedis
+		StringRedisTemplate 与 RedisTemplate：
+			Spring 封装的操作 Redis 的视图，定义了对 redis 5种数据结构的操作方法。
+
+				opsForValue()：操作字符串。
+				opsForList()：操作列表。
+				opsForHash()：操作哈希。
+				opsForSet()：操作集合。
+				opsForZSet()：操作有序集合。
+		StringRedisTemplate 与 RedisTemplate 的区别:
+			1. RedisTemplate 是一个泛型类，而 StringRedisTemplate extends RedisTemplate<String, String>
+			2. StringRedisTemplate 将 key 和 value 序列化为 string 存入 redis； 
+			而 RedisTemplate 默认使用 JdkSerializationRedisSerializer 进行序列化，因此会将 key 和 value 都序列化为 bytes 类型存入 redis，直接后果是
+				a）在 redis 命令行查看到的 key 与 value 都是 bytes 转义后的字符串，类似于 "\xac\xed\x00\x05t\x00\x04user"
+				b）使用 redisTemplate.keys("*") 无法查询到通过 StringRedisTemplate 存入的 key-value（因为反序列化会失败）
+		设置 RedisTemplate 的序列化方式，使得其可以将对象转为 json 字符串存入 redis：
+			@Bean
+			public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+				RedisTemplate<String, Object> template = new RedisTemplate<>();
+				template.setConnectionFactory(factory);
+
+				template.setKeySerializer(RedisSerializer.string());
+				template.setHashKeySerializer(RedisSerializer.string());
+				template.setValueSerializer(RedisSerializer.json());
+				template.setHashValueSerializer(RedisSerializer.json());
+				
+				template.afterPropertiesSet();
+				return template;
+			}
+		RedisTemplate 的用法：
+			0. 获取 RedisTemplate
+				@Autowired
+				private RedisTemplate<String, Object> redisTemplate;
+		
+			1. 直接操作 RedisTemplate
+				判断key是否存在: redisTemplate.hasKey(key);
+				删除单个key: redisTemplate.delete(key);
+				指定key的失效时间: redisTemplate.expire(key,time,TimeUnit.MINUTES);
+				根据key获取过期时间: redisTemplate.getExpire(key);
+				
+			2. 操作 String 类型：需要先获取 Ops:
+					ValueOperations<String, Object> ops = redisTemplate.opsForValue();
+				设置值：ops.set("StringKey", "value");
+				获取值：ops.get("StringKey");
+				自增1：opsForValue.increment("StringKey");
+				自减1：opsForValue.decrement("StringKey");
+			
+			3. 操作 Hash 类型
+				放入单个 key-value:ops.put("bigK", "k1", "v1");
+				取出单个 value：ops.get("bigK", "k1")
+				删除单个 key: ops.delete("bigK","k1");
+				判断key是否存在：ops.hasKey("bigK","k1");
+				
+				获取所有的 keys: ops.keys("bigK")
+				获取所有的 values: ops.values("bigK")
+				获取所有的 key-value 以 Map 实例返回: ops.entries("bigK")
+				
+			4. 操作 Set 类型，需要先获取 Ops：
+					SetOperations<String, Object> ops = redisTemplate.opsForSet();
+				放入多个值：ops.add("k", "v1", "v2");
+				取出 set 的所有值：ops.members("k")
+				删除 set 中的单个值：ops.remove("k","v2")
+				判断某个 value 是否存在：ops.isMember("k","v1")
+				获取 set 的大小：ops.size("k")
+					
+			5. 操作 List 类型，需要先获取 Ops:
+					ListOperations<String, Object> ops = redisTemplate.opsForList();
+				push 多个值：ops.leftPushAll("k","v1","v2","v3");
+				pop 右侧的值：ops.rightPop("k");
+				修改指定位置的值：ops.set("k",1,"otherV");
+				读取指定位置的值：ops.index("k",1);
+				读取指定范围的值：ops.range("k",0,-1)
+				获取列表长度：ops.size("k");
+				
+				
+		
+			
+	整合 junit:
+		导入 starter:
+			<dependency>
+			  <groupId>org.springframework.boot</groupId>
+			  <artifactId>spring-boot-starter-test</artifactId>
+			  <scope>test</scope>
+			</dependency>		
+		常用注解：
+			@Test 
+			@ParameterizedTest :表示方法是参数化测试，下方会有详细介绍
+			@RepeatedTest 
+			@DisplayName 
+			@BeforeEach 
+			@AfterEach 
+			@BeforeAll 
+			@AfterAll 
+			@Tag 
+			@Disabled 
+			@Timeout 
+			@ExtendWith :为测试类或测试方法提供扩展类引用		
+		断言：
+			是 org.junit.jupiter.api.Assertions 的静态方法
+			简单断言：
+				assertEquals	判断两个对象或两个原始类型是否相等
+				assertNotEquals	判断两个对象或两个原始类型是否不相等
+				assertSame	判断两个对象引用是否指向同一个对象
+				assertNotSame	判断两个对象引用是否指向不同的对象
+				assertTrue	判断给定的布尔值是否为 true
+				assertFalse	判断给定的布尔值是否为 false
+				assertNull	判断给定的对象引用是否为 null
+				assertNotNull	判断给定的对象引用是否不为 null		
+				assertArrayEquals 数组断言
+				assertAll 组合断言
+				assertTimeout 超时断言
+				fail 快速失败
+		前置条件：
+			是 org.junit.jupiter.api.Assumptions 的静态方法
+			只有假设成立时才执行后面的代码
+				Assumptions.assumeTrue(1==3);
+				Assumptions.assumFalse (1==3);
+		参数化测试：
+			@ParameterizedTest 注解配合参数来源类的注解使用，对每个参数都执行一次测试，例如：
+				// 手动指定测试用例
+				@ParameterizedTest
+				@ValueSource(ints = {1, 2, 3})
+				public void test(int i) {
+					Assertions.assertEquals(2, i);
+				}		
+				// 使用其它方法的返回值作为测试用例
+				@ParameterizedTest
+				@MethodSource("generateNumbers")
+				public void test2(int i) {
+					Assertions.assertEquals(2, i);
+				}
+
+				static Stream<Integer> generateNumbers(){
+					return Stream.of(1,2,3);
+				}
+			参数化注解：
+				@ValueSource: 为参数化测试指定入参来源，支持八大基础类以及String类型,Class类型
+				@NullSource: 表示为参数化测试提供一个null的入参
+				@EnumSource: 表示为参数化测试提供一个枚举入参
+				@CsvFileSource：表示读取指定CSV文件内容作为参数化测试入参
+				@MethodSource：表示读取指定方法的返回值作为参数化测试入参(注意方法返回需要是一个流)			
+	指标监控：
+		Spring 自带了指标监控的功能
+		使用：
+			1. 导入 starter
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-actuator</artifactId>
+				</dependency>			
+			2. 配置开启所有 web 端的 endpoints
+				management:
+				  endpoints:
+					web:
+					  exposure:
+						include: "*"
+			3. 浏览器访问特定的 endpoints，例如
+				http://localhost:8080/actuator
+				http://localhost:8080/actuator/{endpoints}:
+					health 显示 web 当前的健康状态
+					beans 显示当前 Spring 中的所有 bean
+					conditions 显示当前程序的一些 bean 的 conditions 情况
+					configprops 显示当前SpringBoot的所有配置信息
+					mappings 显示当前 web 服务的所有url路径的映射关系
+					loggers 显示当前的所有日志配置
+				http://localhost:8080/actuator/configprops
+				http://localhost:8080/actuator/metrics/{metric}:
+					jvm.buffer.total.capacity
+		其它配置：			
+			显示 health 的详细信息：
+				添加额外配置：
+					management:
+					  endpoint:
+						health:
+						  show-details: always			
+					或 management.endpoints.web.exposure.include=*
+			开启指定的 endpoint:
+				management:
+				  # 先暴露所有的 web endpoints，再关闭所有的暴露
+				  endpoints:
+					web:
+					  exposure:
+						include: "*"
+					enabled-by-default: false
+
+				  # 然后开启指定的 endpoint
+				  endpoint:
+					health:
+					  show-details: always
+					  enabled: true
+					info:
+					  enabled: true
+					beans:
+					  enabled: true
+					metrics:
+					  enabled: true
+					loggers:
+					  enabled: true		
+	Spring Boot Admin：
+		SpringBoot 有一些监控信息。SpringBoot Admin 可以搭建一个服务，获取这些监控信息，方便在浏览器中监控各个 web 微服务的信息
+		搭建方法：
+			（1）搭建 server 端：
+				1. 创建 SpringBoot web 程序
+				2. 添加 SpringBoot Admin 的服务器端依赖
+					<dependency>
+						<groupId>de.codecentric</groupId>
+						<artifactId>spring-boot-admin-server</artifactId>
+						<version>2.5.1</version>
+					</dependency>
+					<dependency>
+						<groupId>de.codecentric</groupId>
+						<artifactId>spring-boot-admin-server-ui</artifactId>
+						<version>2.5.1</version>
+					</dependency>
+				3. 用 @EnableAdminServer 修饰 SpringBoot 的主程序类
+						注：服务器端的 SpringBoot 与 SpringBoot Admin 如果版本不匹配会导致无法使用 @EnableAdminServer 注解
+					
+					@SpringBootApplication
+					@EnableAdminServer
+					public class SpringBootAdminApplication {
+						public static void main(String[] args) {
+							SpringApplication.run(SpringBootAdminApplication.class, args);
+						}
+					}			
+					
+				4. 运行，浏览器中访问该 server
+			（2）注册 client 端：
+				1. 在 client 的 SpringBoot 程序中添加 SpringBoot Admin 的客户端依赖：
+					<dependency>
+						<groupId>de.codecentric</groupId>
+						<artifactId>spring-boot-admin-starter-client</artifactId>
+						<version>2.5.1</version>
+					</dependency>
+				2. 在 SpringBoot 的配置文件中配置 SpringBoot Admin 的 server 端 url，并暴露 endpoints，使用 ip 作为主机名:
+					spring.boot.admin.client.url=http://localhost:8080  
+					spring.boot.admin.client.instance.prefer-ip=true
+					management.endpoints.web.exposure.include=*				
+				3. 运行，该 client 就会被注册到 server 中
+			
+				
+	SpringBoot 控制运行的 profile：
+		1. 不同 profile 可以对应不同的配置：
+			配置文件声明不同 profile 的配置：
+				application.yml 默认配置
+				application-xxx.yml 对应的运行环境为 xxx
+			使用注释声明不同 profile 的配置：
+				@Profile("xxx") 用于修饰生成 bean 的类或者方法，xxx 为对应的运行环境
+				
+		2. 激活指定的环境 xxx
+			在配置文件中激活：			
+				spring:
+				  profiles:
+					active: xxx		
+			运行时激活:
+				java -jar xxx.jar --spring.profiles.active=xxx
+		
+		配置优先级从高到低：
+			运行时指定
+			特定的 profile
+			默认的 profile
+			
+		profile分组：
+			1. 使用下列命令，把 application-proddb.yaml、application-prodmq.yaml 分配到组 production 中
+				spring.profiles.group.production[0]=proddb
+				spring.profiles.group.production[1]=prodmq
+
+			2. 使用：--spring.profiles.active=production  激活 production 对应的 profile
+		
+		动态读取配置的值：
+			@Value("${age:0}") // 读取 age 配置的值，如果不存在，就设置为 0
+			Integer age;
+	SpringBoot 外部化配置：
+		官方描述的外部配置加载顺序（优先级由低到高）：
+			https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config
+		官方描述的配置文件查找顺序（优先级由低到高）：
+			https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files
+			
+			(1) classpath 根路径
+			(2) classpath 根路径下config目录
+			(3) jar包当前目录
+			(4) jar包当前目录的config目录
+			(5) /config子目录的直接子目录
+	
+	自定义 SpringBoot 的 starter：
+		doc: https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-auto-configuration.custom-starter
+		
+		结构
+			模块1：xxx-starter
+				只用于引入依赖。会引入实现对应的具体功能的 jar 包
+			模块2：xxx-autoconfigure
+				类：
+					xxxAutoConfiguration: 用于创建 bean。一般至少会创建 properties bean
+					xxxProperties：定义一些属性。可以声明前缀，用于绑定配置文件中的值
+				配置文件:
+					META-INF/spring.factories: 使能 xxxAutoConfiguration 类
+	
+Redis:
+	启动与关闭：
+		redis-server 启动服务器
+		redis-server redis.conf 启动服务器，并指定配置文件
+		redis-cli 启动客户端
+		redis-cli shutdown 关闭服务器
+	配置：
+		设置密码 
+			config set requirepass password		
+			连接后验证密码：
+				redis-cli
+				auth password
+			连接时使用密码：
+				redis-cli -a password
+		关闭保护模式:
+			config set protected-mode no
+	常用命令：
+		ping Pong 为成功
+		select 命令切换数据库
+		dbsize 查看当前数据库的 key 的数量
+		
+	数据类型：
+		key 相关命令：
+			flushdb 清空当前库
+			flushall 通杀全部库
+			
+			keys *查看当前库所有 key (匹配：keys *1)
+			exists key 判断某个 key 是否存在
+			type key 查看你的 key 是什么类型
+			ttl key 查看还有多少秒过期，-1 表示永不过期，-2 表示已过期
+			
+			del key 删除指定的 key 数据
+			unlink key 根据 value 选择非阻塞删除
+			expire key 10 10 秒钟：为给定的 key 设置过期时间
+		字符串 string 类型：
+			get <key>查询对应键值
+			mget <key1><key2><key3> 同时获取一个或多个 value
+			getset <key><value> 以新换旧，设置了新值同时获得旧值
+			strlen <key>获得值的长度
+			getrange <key><起始位置><结束位置> 获得值的范围，类似 java 中的 substring，前包，后包
+			
+			set <key><value>添加键值对
+			setex <key><过期时间><value> 设置键值的同时，设置过期时间，单位秒。
+			setrange <key><起始位置><value> 用 <value> 覆写<key>所储存的字符串值，从<起始位置>开始(索引从 0 开始)。
+			setnx <key><value>只有在 key 不存在时 设置 key 的值
+			append <key><value>将给定的<value> 追加到原值的末尾
+			mset <key1><value1><key2><value2> 同时设置一个或多个 key-value 对
+			
+			incr <key> 将 key 中储存的数字值增 1
+			decr <key> 将 key 中储存的数字值减 1
+			incrby / decrby <key><步长>将 key 中储存的数字值增减。自定义步长。
+		Redis 列表(List)：
+			llen <key>获得列表长度
+			lpop/rpop <key>从左边/右边吐出一个值。值在键在，值光键亡。
+			lindex <key><index>按照索引下标获得元素(从左到右)
+			lrange <key><start><stop> 按照索引下标获得元素(从左到右)
+			rpoplpush <key1><key2>从<key1>列表右边吐出一个值，插到<key2>列表左边
+			
+			lpush/rpush <key><value1><value2><value3> .... 从左边/右边插入一个或多个值。
+			lset<key><index><value>将列表 key 下标为 index 的值替换成 value
+		Redis 集合(Set)：
+			smembers <key>取出该集合的所有值。
+			sismember <key><value>判断集合<key>是否为含有该<value>值，有 1，没有 0
+			scard<key>返回该集合的元素个数。
+			srandmember <key><n>随机从该集合中取出 n 个值。不会从集合中删除 。
+					
+			sadd <key><value1><value2> .....
+			
+			srem <key><value1><value2> .... 删除集合中的某个元素。
+			spop <key>随机从该集合中吐出一个值。
+			smove <source><destination>value 把集合中一个值从一个集合移动到另一个集合
+		Redis 哈希(Hash)：
+			hexists<key1><field>查看哈希表 key 中，给定域 field 是否存在。
+			hget <key1><field>从<key1>集合<field>取出 value
+			hkeys <key>列出该 hash 集合的所有 field
+			hvals <key>列出该 hash 集合的所有 value
+			
+			hset <key><field><value> 给<key>集合中的 <field>键赋值<value>
+			hmset <key1><field1><value1><field2><value2>... 批量设置 hash 的值
+			hsetnx <key><field><value>将哈希表 key 中的域 field 的值设置为 value ，当且仅当域 field 不存在 .
+			
+			hincrby <key><field><increment>为哈希表 key 中的域 field 的值加上增量 1 -1
+		Redis 有序集合 Zset(sorted set) 低 -> 高：
+			zrank <key><value>返回该值在集合中的排名，从 0 开始。
+			zrange <key><start><stop> [WITHSCORES] 返回有序集 key 中，下标在<start><stop>之间的元素。带 WITHSCORES，可以让分数一起和值返回到结果集。
+			zrangebyscore key min max [withscores] [limit offset count] 返回有序集 key 中，所有 score 值介于 min 和 max 之间(包括等于 min 或 max )的成员。 有序集成员按 score 值递增(从小到大)次序排列。
+			zrevrangebyscore key maxmin [withscores] [limit offset count] 同上，改为从大到小排列。
+		
+			zadd <key><score1><value1><score2><value2> 将一个或多个 member 元素及其 score 值加入到有序集 key 当中。
+			
+			zrem <key><value>删除该集合下，指定值的元素
+			zcount <key><min><max>统计该集合，分数区间内的元素个数
+			
+		------- 新数据类型：
+		Bitmaps： 底层使用字符串存储。1字符 = 8字节。可以使用 string 的命令操作 bitmaps
+			getbit<key><offset>获取 Bitmaps 中某个偏移量的值
+			bitcount<key>[start end] 统计字符串从 start 字节到 end 字节比特值为 1 的数量。按照字节计算，而不是字节计算。
+				
+			
+			setbit<key><offset><value>设置 Bitmaps 中某个偏移量的值（0 或 1）
+			
+			bitop and(or/not/xor) <destkey> [key…] bitop 是一个复合操作， 它可以做多个 Bitmaps 的 and（交集） 、 or（并集） 、 not （非） 、 xor（异或） 操作并将结果保存在 destkey 中。
+				例如 bitop and unique:users:and:20201104_03 unique:users:20201103 unique:users:20201104
+		HyperLogLog：		
+			pfcount<key> [key ...] 计算 HLL 的近似基数，可以计算多个 HLL，比如用 HLL 存储每 天的 UV，计算一周的 UV 可以使用 7 天的 UV 合并计算即可
+			
+			pfadd <key>< element> [element ...] 添加指定元素到 HyperLogLog 中
+			pfmerge<destkey><sourcekey> [sourcekey ...] 将一个或多个 HLL 合并后的结果存 储在另一个 HLL 中，比如每月活跃用户可以使用每天的活跃用户来合并计算可得
+		Geospatial：
+			geopos <key><member> [member...] 获得指定地区的坐标值
+			geodist<key><member1><member2> [m|km|ft|mi ] 获取两个位置之间的直线距离
+			georadius<key>< longitude><latitude>radius m|km|ft|mi 以给定的经纬度为中心， 找出某一半径内的元素
+		
+			geoadd<key>< longitude><latitude><member> [longitude latitude member...] 添 加地理位置（经度，纬度，名称）
+		
+	订阅：
+		SUBSCRIBE channel1 订阅频道
+		publish channel1 hello 向频道发布消息
+		
+	java 包 Jedis:
+		连接、关闭：
+			Jedis jedis = new Jedis("192.168.137.3",6379);
+			jedis.ping();
+			jedis.close();
+		keys： 
+			jedis.set("k1", "v1");
+			jedis.keys("*");
+			jedis.exists("k1")
+			jedis.ttl("k1")
+			jedis.get("k1")
+		String:
+			jedis.mset("str1","v1","str2","v2","str3","v3");
+			jedis.mget("str1","str2","str3")
+		List:
+			jedis.lrange("mylist",0,-1)
+		set：
+			jedis.sadd("orders", "order01");
+			jedis.smembers("orders")
+			jedis.srem("orders", "order02");
+		hash：
+			jedis.hset("hash1","userName","lisi");
+			jedis.hget("hash1","userName")
+			jedis.hmset("hash2",map); // 其中 map = new HashMap<String,String>();
+			jedis.hmget("hash2", "telphone","email");
+		zset：
+			jedis.zadd("zset01", 100d, "z3")
+			jedis.zrange("zset01", 0, -1);
+    事务：	
+		事务的运行过程中，不会执行其它客户端的命令
+		命令：
+			multi 开始拼装事务
+			exec 执行事务
+			discard 取消事务
+			watch 在multi之前执行，用于监视指定的 key，如果在之后的事务中，发现 key 被修改了，会使得事务失效。
+			unwatch 取消监视
+		规则：
+			如果在multi拼装过程中失败，所有命令都不执行
+			如果在exec过程中失败，失败的命令不执行，都是不失败的命令会被执行
+			
+	redis 做秒杀缓存：
+		超卖问题;
+			由于并发，导致库存量为负值
+			可使用乐观锁解决
+		库存遗留问题：
+			由于乐观锁导致很多事务失败，从而导致商品没有卖完
+			可以
+			
+	Redis 持久化：
+		两种持久化方式：
+			RDB (Redis DataBase):
+				每隔指定的时间间隔后，将缓存数据写入磁盘（快照 Snapshot）。恢复时默认会将快照文件(dump.rdb)读入内存
+				只需要有 dump.rdb 文件，就可以恢复数据
+				参数配置：
+					dbfilename 快照文件名，默认为 dump.rdb
+					dir 快照文件保存的位置，默认为 redis server 启动时的路径
+					stop-writes-on-bgsave-error RDB出现问题时，Redis是否拒绝接收写请求
+					save 写快照的规则
+				缺点：如果redis server异常终止，最后一次快照后修改的数据会丢失
+				优点：回复速度快，适合大规模的数据恢复。适合对数据完整性和一致性要求不高时使用
+			AOF (append only file):
+				以日志的形式记录每个写操作，附加到文件（appendonly.aof）末尾。恢复数据时重新执行文件中的写操作
+				配置：
+					appendonly 是否开启AOF
+					appendfilename AOF的备份文件名
+					appendfsync AOF同步（备份）频率设置（每次写、每秒、或者把同步数据交给操作系统）
+				优点：数据完整性比 RBD 更强
+				缺点：恢复速度慢，占用的磁盘空间更大
+			
+			Redis 默认开启 RBD，关闭 AOF
+			当AOF与RDB都开始时，Redis server 启动时默认使用 AOF 的文件恢复数据（AOF的数据更完整）
+			如何选择使用 RDB 还是 AOF：
+				官方建议两个都使用
+				如果对数据不敏感，可以只使用 RDB
+				不建议单独使用 AOF，因为可能会出现 Bug
+				如果只做纯内存缓存，可能都不用
+				
+	Redis 主从复制：
+		1. 每个 redis server 都使用下列配置文件：
+			include ./redis.conf
+			pidfile /var/run/redis_num.pid
+			port port_num
+			dbfilename dump_num.rdb
+			masterauth master_password		
+		2. 启动所有的 server:
+			redis-server redis_xxx.conf
+		3. 在负责读的节点（slave）运行命令，连接到 master 节点：
+			slaveof master_ip master_port 
+		4. 在每个节点可查看 master-slave 信息：
+			info replication
+		
+		注意：
+			master 节点可读可写
+			slave 节点只能读，不可写
+			slave 连接到 master 之后，数据会被 master 的数据覆盖掉
+			slave server 重启后，会断开与 master 的连接，需要重新使用 slaveof 命令连接到 master 节点
+			master的 slave可以有好几层，主从复制的数据路径类似于树，master是树的根节点 slave 是树的子节点
+			slave 可以使用 slaveof no one 命令，从主从复制的树中脱离出来，作为新树的根节点
+		
+		主从复制原理：
+			1. slave 连接上 master 之后，请求 master 生成 rdb 文件，发送给 slave 用于构建数据
+			2. 之后，每次 master 有写操作后，master 主动发消息给 slave 从而同步数据
+			
+		
+		哨兵模式：
+			设置一些哨兵，监测 master 节点，当 master 节点无法正常连接时，自动选举出一个 slave 升级为 master 节点
+			用法：
+			1. 正常启动 master-slaves
+			2. 启动一个哨兵脚本：
+				redis-sentinel sentinel.conf
+				其中 sentinel.conf 的内容如下：
+					# 指定目前的 master 的 ip、port，其中 1 表示只需要一个哨兵同意启动故障转移就可以进行转移
+					sentinel monitor xxxName master_ip master_port 1 
+					# 指定 master 的密码
+					sentinel auth-pass aMaster redis
+			
+			注意：
+				当哨兵运行时，哨兵会自动修改哨兵和所有master/slaves的配置文件，使得指向新的 master 节点。
+				崩溃的 master 会自动降级为 slave，由于配置文件被改写，如果指定配置文件再次启动，间隔一小段时间后，会自动连接到新的 master 节点
+				有时候哨兵选取出的 slave 节点可能是之前崩溃的那个 master，目前不知道为什么有这个问题
+				jedis 编程时，需要从指定哨兵，由哨兵生成 jedis 实例。
+				
+				
+	Redis 集群：
+		为 无中心化 集群，对于N个节点，每个节点只存储 1/N 的数据
+		搭建集群：
+			1. 启动多个 redis server, 配置文件如下：
+				# 需要修改下列的 11001，不同节点使用不用的数字
+				include ./redis.conf
+				pidfile "/var/run/redis_11001.pid"
+				port 11001
+				dbfilename "dump11001.rdb"
+				cluster-enabled yes
+				cluster-config-file nodes-11001.conf
+				cluster-node-timeout 5000			
+			2. 以集群方式运行 redis-cli，会自动分配 masters/slaves 节点
+				redis-cli --cluster create --cluster-replicas 1 127.0.0.1:11001 127.0.0.1:11002 127.0.0.1:11003 127.0.0.1:11004 127.0.0.1:11005 127.0.0.1:11006
+				
+				其中 1 表示以简单的方式配置 masters/slaves
+			3. 客户端连接集群后可使用集群
+				redis-cli -c -p 11001
+					-c 开启集群模式
+					-p 集群中容易一个节点的端口都可以
+					
+			注意：	
+				使用写操作时，会自动跳转到 master 节点
+				不同节点使用 keys * 显示的数据可能不一样
+				
+			
+		
+			
+				
+并发访问测试：
+	ab 是 Apache Bench 工具，用于发送 http 请求，进行 web 的并发测试
+		ab -n 50 -c 30 -p profile.txt -T application/x-www-form-urlencoded http://127.0.0.1:8080/seckill
+			-n 指定总的发送请求
+			-c 指定并发数
+			-p 指定文件名，文件内包含POST请求的参数，比如 pid=redmi13&uid=uid:3
+			-T 指定请求 header 的 Content-Type， POST对应 application/x-www-form-urlencoded
+			
+			
+				
+breakpoint: https://www.bilibili.com/video/BV1Rv41177Af?p=37&t=5.3
+				
+				
+			
+		

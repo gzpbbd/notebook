@@ -1,0 +1,81 @@
+目录结构
+编译运行：
+    mvn compile 编译
+    mvn exec:java -Dexec.mainClass="com.hcp.maven_20211011.Test_01" 
+    mvn 插件 目标
+        -D 传入属性参数
+        -P 使用指定的 profile 配置
+        
+maven 项目分类：
+    普通的java项目
+    web 项目
+    
+IDEA使用 maven:
+    maven提供了一些项目模板(archetype)：模板会自动创建一些目录和默认配置文件，目的在于简化程序员的操作
+        maven-archetype-quickstart
+        maven-archetype-webapp
+        
+maven-archetype-webapp：
+    需要配置 pom.xml:
+        1. 使用 jetty 开启服务
+        只需要在 <build></build>内部添加下列插件信息就可以了：
+            <plugins>
+              <!-- maven测试插件 -->
+              <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.11.v20180605</version>
+              </plugin>
+            </plugins>        
+        注：如果使用：mortbay.jetty 会出现服务器 500 错误
+        run中添加配置 maven -> command line填“jetty:run”
+        访问网址：http://localhost:8080/
+        
+        2. 使用 tomcat 开启服务
+        只需要在 <build></build>内部添加下列插件信息就可以了：
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <!-- 此处为项目的上下文路径 -->
+                    <path>/test</path>
+                    <!--此处配置了访问的端口号 -->
+                    <port>8082</port>
+                    <!--字符集编码 -->
+                    <uriEncoding>UTF-8</uriEncoding>
+                    <!--服务器名称 -->
+                    <server>tomcat7</server>
+                </configuration>
+            </plugin>        
+        
+        run中添加配置 maven -> command line填“tomcat7:run”
+        访问网址：http://localhost:8082/test/
+        
+maven 添加依赖的jar包:
+    1. 在网站 https://mvnrepository.com/ 中找包
+        找到包的对应版本，将其 dependency 信息加入 dependencies 标签下。   
+        
+maven多模块配置：视频作者用的java为1.8
+    参考 maven 视频的讲义
+    
+maven 使用 pom.xml 中的依赖jar包时，应该是从仓库中找。所以如果自己用了自己写的其它模块，需要把其它模块用 maven install 到仓库中，才能运行需要依赖项的模块。
+
+maven的依赖与插件：
+    依赖：
+        是指自己写的程序中需要调用的jar包
+    插件：
+        是用于编译、运行程序的程序
+        每个插件都有插件的目标
+            如：tomcat7:run 表示 插件 tomcat7 的 run 目标
+            插件的目标对应了 maven 中的一些生命周期
+        mvn compile 命令其实是调用了内置的一个插件，执行了该插件对应的 compile 目标
+        有些插件有配置选项，可以使用 <configuration> ... </configuration> 标签进行配置
+    依赖与插件共有的概念：
+        坐标：groupId、artifactId、version
+        本地仓库、远程仓库
+    
+maven 的配置文件(优先级从 低 -> 高)：
+    1. 安装目录的 settings.xml （全局配置） <
+    2. ~/.m2/settings.xml （用户配置） < 
+    3. 每个自定义项目的顶层的 pom.xml 文件 （项目配置）
