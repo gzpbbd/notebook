@@ -496,13 +496,6 @@ Thymeleaf:
 			<div th:replace="commonName :: content"></div> 不保留引用标签
 			<div th:include="commonName :: content"></div> 保留引用标签
 	
-Restful 接口：
-	create /user post
-	update /user post ?_method=put 
-	delete /user/id post ?_method=delete
-	read /user/id get
-	
-	需要在 web.xml 中增加 HiddenhttpMethodFilter，且位置在 CharacterEncodingFilter 之后
 	
 
 Vue：
@@ -701,17 +694,28 @@ Restful 接口：
 		delete delete
 		read get
 	例如：
-		 read all: /user get
-		 read by info: /user/1 get
-		 delete by info: /user/1 delete
-		 create: /user post
-		 update: /user put
+        read all: /user get
+        read by info: /user/1 get
+        delete by info: /user/1 delete
+        create: /user post
+        update: /user put
+        -------------------
+        create /user post
+        update /user post ?_method=put 
+        delete /user/id post ?_method=delete
+        read /user/id get
+    
+        
 	而浏览器一般只能发送 get 与 post 请求：
 		超链接 <a>  get 请求
 		表单 <form> 的 method 可以为 get 或者 post
-	SpringMVC 提供了一个 HiddenHttpMethodFilter， 可以根据 post 请求附带的 _param 参数修改 http 请求为 delete 或者 put
+    需要在 web.xml 中增加 HiddenhttpMethodFilter (SpringMVC 提供)，且位置在 CharacterEncodingFilter 之后:
+        可以根据 post 请求附带的 _param 参数修改 http 请求为 delete 或者 put
 	
 	使用 @PathVariable 的形参标注可以便捷获取 url 中的信息，可以与 Restful 风格配合使用
+    
+	
+	
 		
 HttpMessageConverter 报文信息转换器：
 	@RequestBody: 标识形参。用于获取请求体。不常用
@@ -1516,6 +1520,12 @@ SpringBoot:
 		Driud 连接池：
 			带有监控功能
 			使用 starter 时，只需要在配置文件中配置一下，就可以监控，从而访问网页，查看服务器的访问情况（特别是关于数据库的） 
+            maven 依赖：
+                <dependency>
+                   <groupId>com.alibaba</groupId>
+                   <artifactId>druid-spring-boot-starter</artifactId>
+                   <version>1.1.17</version>
+                </dependency>            
 			配置：
 				# 添加插件: stat 统计功能
 				spring.datasource.druid.filters=stat
@@ -1523,6 +1533,14 @@ SpringBoot:
 				spring.datasource.druid.web-stat-filter.enabled=true
 				# 开启监控页面的 servlet (通过 /druid 路径访问)
 				spring.datasource.druid.stat-view-servlet.enabled=true
+				# 最大等待时间
+				spring.datasource.druid.max-wait=1000
+				# 最大连接数
+				spring.datasource.druid.max-active=30
+				# 初始连接数
+				spring.datasource.druid.initial-size=10
+                
+                # 其它 max-wait 
 	整合 mybatis:
 		1. 导入 mybatis 对应的 starter
 			<dependency>
@@ -1531,9 +1549,11 @@ SpringBoot:
 				<version>2.1.3</version>
 			</dependency>
 		2. 在 SpringBoot 的配置文件中指定 mapper 的位置：
-			mybatis:
+			# 如果不配置，会出现错误：
+            #   org.apache.ibatis.binding.BindingException: Invalid bound statement (not found): fit.hcp.imoocsecskill.dao.SeckillProductDao.queryById
+            mybatis:
 				mapper-locations: classpath:mapper/*.xml
-		3. 声明 mapper 的接口，用 @Mapper 修饰
+           3. 声明 mapper 的接口，用 @Mapper 修饰
 			@Mapper
 			public interface UserMapper {
 				@Select("select * from user")
@@ -2187,22 +2207,93 @@ Redis:
 			注意：	
 				使用写操作时，会自动跳转到 master 节点
 				不同节点使用 keys * 显示的数据可能不一样
-				
+                集群使用 key 的内容计算slot，从而确定放在哪个节点上，因此一般方法不能同时设置多个key，需要使用组的概念:
+                    mset k1{group} v1 k2{group} v2
+                如果 master 节点挂掉，对应的一个slave会升级为master，而挂掉的 master 重新启动后，会被分配为 slave
+                如果某一段插槽的主从都挂掉，根据 cluster-require-full-coverage 值的不同，集群会有不同的状态（yes: 整个集群挂掉; no: 其它插槽可用）
+                    
+            其它命令:
+                cluster nodes 查看集群节点信息
+                
+        使用 jedis 可连接 redis cluster，实操时出现问题
+                    
+        缓冲穿透： 
+            查询的key未在缓冲中，导致需要查询数据库，增加数据库的压力
+            此种情况有可能是黑客恶意访问导致的
+                1. 设置黑名单
+        缓冲击穿:
+            查询的单个热门key在redis中存在，但是已经过期。此时若有大量并发请求，这些请求会给后端数据库带来巨大压力
+            解决办法：
+                1. 延长热门数据有效时间
+                2. 使用排它锁设置缓冲
+        缓冲雪崩：
+            查询的一批热门key集中过期，导致后端数据库压力增大
+            解决办法：
+                1. 多级缓冲架构
+                2. 使用排它锁进行缓冲更新
+                3. 设置过期标注，主动在缓冲过期时更新缓存
+                4. 给过期时间添加随机数，减小热门数据集中过期的概率
 			
 		
-			
+    分布式锁:
+        JVM 自带的锁是单机锁
+        实现分布式锁的方式：
+            1. 基于数据库
+            2. 基于缓存 （如 redis）：性能最高
+            3. 基于 zookeeper：可靠性最高
+        基于 redis实现分布式锁:
+            原理：
+                1. set key value nx 是原子性的，且只有在 key 不存在时才执行。可以把 “set 成功” 看成加锁成功，把"delete key"看做解锁。
+                2. redis 部署在服务器上，多个应用通过网络请求同一把锁
+            代码案例：
+                # 加锁
+                String uuid = UUID.randomUUID().toString();
+                Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", uuid, 1000, TimeUnit.MILLISECONDS);
+                while (!lock) {
+                    Thread.sleep(50);
+                    lock = redisTemplate.opsForValue().setIfAbsent("lock", uuid);
+                }
+
+                # 对数据做操作
+                num = ops.get();
+                int i = Integer.valueOf(num) + 10;
+                ops.set(String.valueOf(i));
+                num = ops.get();
+
+                # 解锁，使用 uuid 进行判断，防止误删其它进程设置的锁
+                if (uuid.equals(redisTemplate.opsForValue().get("lock")))
+                    redisTemplate.delete("lock");
+                    
+            注意:
+                设置过期时间，是为了防止加锁后程序异常导致未能解锁的情况
+                但是这样也有一些问题：
+                    过期时间如果太短，还是会存在多个进程同时操作数据的情况
+        
+    Redis 6 新特性：
+        ACL：访问控制列表。可以更加细化地控制数据访问权限
+        IO多线程：之前IO只支持单线程，现在支撑多线程了。不过执行 redis 命令的时候，还是单线程。
+            默认不开启，需要自行配置：
+                # 开启多线程
+                io-threads-do-reads yes
+                # 线程数量
+                io-threads 4
+        工具支持 cluster
+        
 				
 并发访问测试：
 	ab 是 Apache Bench 工具，用于发送 http 请求，进行 web 的并发测试
-		ab -n 50 -c 30 -p profile.txt -T application/x-www-form-urlencoded http://127.0.0.1:8080/seckill
+		ab -n 50 -c 30 -p profile.txt -T application/x-www-form-urlencoded http://192.168.168.1:8080/seckill
 			-n 指定总的发送请求
 			-c 指定并发数
 			-p 指定文件名，文件内包含POST请求的参数，比如 pid=redmi13&uid=uid:3
 			-T 指定请求 header 的 Content-Type， POST对应 application/x-www-form-urlencoded
-			
+		
+    
+
 			
 				
-breakpoint: https://www.bilibili.com/video/BV1Rv41177Af?p=37&t=5.3
+breakpoint:https://www.bilibili.com/video/BV1Kw411Z7dF?p=25&t=92.8
+
 				
 				
 			

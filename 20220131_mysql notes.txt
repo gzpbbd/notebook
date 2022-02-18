@@ -1,0 +1,204 @@
+笔记：
+	等值连接，也称为内部联结：
+		SELECT * FROM products, vendors where products.vend_id=vendors.vend_id;
+		或 
+		SELECT * FROM products INNER JOIN vendors ON products.vend_id=vendors.vend_id;
+		
+
+	自联结：联结的表是同一个表
+		SELECT p1.prod_id, p1.prod_name FROM products p1, products p2 WHERE p1.vend_id=p2.vend_id and p2.prod_id="dtntr";
+	自然联结： 排除相同列多次出现，使得每个列只返回一次
+		SELECT products.*, vend_name FROM products, vendors where products.vend_id=vendors.vend_id;
+		
+		自然联结属于等值连接（内部联结）。但是非自然联结的等值连接（内部联结）因为包含了重复的列，所以实际中没有使用价值。
+
+# python连接MySql
+
+​    连接： conn = pymysql.connect(host='localhost', user='root', password='xccbbd', db='spider', charset='utf8')
+​    创建游标： cursor = conn.cursor()
+​    提交改动：conn.commit()
+​    关闭游标：cursor.close()
+​    关闭连接：conn.close()
+
+# python执行MySql命令
+
+​    cursor.execute('mysql_command')
+python获取Mysql查询命令的结果：
+​    cursor.fetchall()
+
+# 增删改查 
+
+```mysql
+增:
+	# 插入单行
+	insert into table_name(column_1, column_2) values(value_1, value_2) 
+	# 插入多行
+	insert into table_name(column_1, column_2) values(value_1_1, value_1_2), (value_2_1, value_2_2)
+删:
+   # 如果没有where子句，则改动访问为所有行：
+   	delete from table_name where condition_expression
+改:
+    update table_name set column_name = other_value where condition_expression
+
+查：
+    # 显示指定表的列信息 
+    show columns from table_name
+    # 查找指定表中的列
+    select * from table_name
+    select column_name_1, column_name_2 from table_name
+    # 按条件筛选
+    # 普通条件筛选： 
+    select * from table_name where column_name = value
+    select * from table_name where column_name between value_1 and value_2
+    # LIKE筛选(%运算符匹配任意字符任意次数，_运算符匹配任意字符一次)： 
+    select * from table_name where column_name like 'like_expression'
+    # 正则表达式：
+    select * from table_name where column_name regexp 're_expression'
+```
+
+# mysql库层次操作：
+
+登陆操作： mysql -u root -p 然后输入密码
+
+​    使用指定数据库 use database_name
+​    显示所有数据库 show database
+​    显示当前库中的所有表 show tables
+
+# mysql修改数据表结构：
+
+​    增加列: alter table table_name add new_column_name
+​           alter table table_name add new_column_name_1, add new_column_name_2
+​    删除列: alter table table_name drop old_column_name
+
+# mysql数据类型：
+
+​    串类型：
+​        定长串：char(char_len)，其中char_len <= 255字符
+​        变长串：
+​            varchar(varchar_len) 其中varchar_len <= 255 B
+​            tinytext 最大长度 255 B
+​            text 最大长度 64 KB
+​            mediumtext 最大长度 16 MB
+​            longtext 最大长度 4 GB
+​        变长串集合:
+​            set 最多64个变长串
+​            enum 最多64K个变长串
+​    数值类型：
+​        boolean
+​        int 4 bytes
+​        float 4 bytes
+​        double 8 bytes
+​        decimal 精度可变的浮点数
+​    日期类型：
+​        date
+​        time
+​        datetime
+​    二进制数据类型，可用于保存图像、视频等：
+​        tinyblob 最大长度 255 B
+​        blob 最大长度 64 KB
+​        mediumblob 最大长度 16 MB
+​        longblob 最大长度 4 GB
+
+# python字符串编码：
+
+​    encode: str -> bytes(二进制类型)
+​    decode: bytes(二进制类型) -> str
+​    utf-8 和 gbk 都可表示中文
+
+# 索引：
+
+​    用于加快查询速度
+​        如果无索引时查询表，需要安装顺序查询，耗时长；如果有索引时查询表，先从额外的索引表中查询到数据对应的位置，再直接按照位置读取数据
+​    优点：
+​        加快查询速度
+​    缺点:
+​        索引需要动态维护，会降低删除和添加数据的速度
+​        索引需要额外的存储空间
+​        
+
+# 锁
+
+## 种类划分
+
+### 数据操作类型
+
+- 读锁（共享锁，S锁）：多个事务的读操作可以同时进行 
+  - select ... lock in share mode 
+  - 或者 select ... for share （MySQL 8版本之后）
+- 写锁（排它锁，X锁）：阻塞其它写锁和读锁
+  - 对于 InnoDB引擎，读锁和写锁支持表级别与行级别
+
+### 涉及数据的范围
+
+- 表锁：对整个表加锁
+  - 加锁：lock table table_name1, read/write, table_name2, read/wirte;
+  - 解锁：unlock table; （会解锁该连接内的所有表锁）
+- 行锁：对某些行
+  - 在事务中操作数据时，似乎会自动对被操作的记录添加行级锁
+
+只有明确指定主键，才会执行行锁，否则执行表锁：
+
+- 
+
+  ```mysql
+  # 无锁 (主键不存在)
+  select * from user where id=-1 for update;
+  
+  # 行锁（主键明确）
+  select * from user where id=1 for update;
+  
+  # 表锁（主键不明确）
+  select * from user where name='xcc' for update;
+  select * from user where id>10 for update;
+  ```
+
+  
+
+# 事务操作
+
+## 命令
+
+开始事务：start transcation 或者 begin （别名） 
+
+提交事务：commit work 或者 commit
+
+回滚事务：rollback work 或者 rollback
+
+# 存储引擎
+
+存储引擎：涉及真实数据结构的组件
+
+查看支持的存储引擎: show engines;
+
+默认：InnoDB (唯一支持事务、行级锁的引擎)
+
+# 存储过程
+
+类似于编程语言中的函数
+
+```mysql
+-- 创建存储过程（in：输入，out: 输出。）
+create procedure get_sum_between_scope(in min_id int, in max_id int, out total int)
+begin 
+	-- 必须先定义变量 	
+	declare bigger_total int default 0;
+	declare smaller_total int default 0;
+	
+	-- 计算中间结果
+	select sum(age) from user where id>max_id into bigger_total;
+	select sum(age) from user where id<min_id into smaller_total;
+	
+	-- 计算最终结果	
+	select bigger_total+smaller_total into total;	
+end;
+
+-- 调用存储过程
+call get_sum_between_scope(12, 34, @total_age);
+
+-- 打印存储过程的输出值
+select @total_age;
+
+-- 删除存储过程（如果同名存储过程存在，需要先删除才能再次创建）
+drop procedure get_sum_between_scope;
+```
+
